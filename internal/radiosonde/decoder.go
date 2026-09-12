@@ -217,7 +217,7 @@ func (d *Decoder) Configure(enabled bool, family string, frequency, center int64
 				d.events = d.events[:2000]
 			}
 			if d.current == s {
-				d.status.State = "RECIBIENDO"
+				d.status.State = "RECEIVING"
 			}
 			d.mu.Unlock()
 			if d.eventSink != nil {
@@ -325,7 +325,7 @@ func (d *Decoder) Snapshot() Status {
 			}
 		}
 		s.Error = strings.Join(errors, "; ")
-		s.State = "AUTO · BUSCANDO"
+		s.State = "AUTO · SEARCHING"
 		if len(detected) > 0 {
 			s.State = "AUTO · " + strings.Join(detected, " + ")
 		}

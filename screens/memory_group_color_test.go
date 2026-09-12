@@ -19,7 +19,7 @@ func TestMemoryGroupColorPersistsSeparately(t *testing.T) {
 }
 func TestUnknownGroupKeepsDefaultCyan(t *testing.T) {
 	panel := &MemoryPanel{groupColors: map[string]string{}}
-	if got := panel.groupColor("NUEVO"); got != colors.cyan {
+	if got := panel.groupColor("NEW"); got != colors.cyan {
 		t.Fatalf("fallback=%+v", got)
 	}
 }
@@ -28,10 +28,10 @@ func TestCreateEmptyMemoryGroupPersists(t *testing.T) {
 	dir := t.TempDir()
 	panel := &MemoryPanel{groupColorsPath: filepath.Join(dir, "groups.json"), groupColors: map[string]string{}, selectedGroup: "ALL"}
 	panel.rebuildGroups()
-	panel.pendingGroup = "Emergencias"
+	panel.pendingGroup = "Emergencies"
 	panel.pendingGroupColor = 3
 	panel.commitNewGroup()
-	if panel.selectedGroup != "Emergencias" || !panel.groupExists("emergencias") {
+	if panel.selectedGroup != "Emergencies" || !panel.groupExists("emergencies") {
 		t.Fatalf("new group was not selected or indexed: %+v", panel.groups)
 	}
 	loaded := &MemoryPanel{groupColorsPath: panel.groupColorsPath, groupColors: map[string]string{}, selectedGroup: "ALL"}
@@ -65,13 +65,13 @@ func TestEditGroupCanReturnToNoMove(t *testing.T) {
 	}
 	panel.moveEditedGroup()
 	if panel.pendingMoveGroup == "" {
-		t.Fatal("el primer clic debe seleccionar un DESTINATION")
+		t.Fatal("the first click must select a destination")
 	}
 	for panel.pendingMoveGroup != "" {
 		panel.moveEditedGroup()
 	}
 	if panel.pendingMoveGroup != "" {
-		t.Fatal("el selector debe poder BACK a DO NOT MOVE")
+		t.Fatal("the selector must be able to return to DO NOT MOVE")
 	}
 }
 
@@ -93,9 +93,9 @@ func TestEditGroupMovesMemoriesIntoExistingGroup(t *testing.T) {
 	}
 	panel.commitGroupColor()
 	if panel.memories[0].Group != "DESTINATION" || panel.selectedGroup != "DESTINATION" {
-		t.Fatalf("las MEMORIES no se movieron al GROUP existente: %+v", panel)
+		t.Fatalf("the memories were not moved to the existing group: %+v", panel)
 	}
 	if panel.groupColors["DESTINATION"] != "#123456" {
-		t.Fatal("MOVE MEMORIES no debe sustituir el color del GROUP de DESTINATION")
+		t.Fatal("MOVE MEMORIES must not replace the destination group's color")
 	}
 }

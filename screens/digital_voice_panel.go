@@ -28,7 +28,7 @@ func NewDigitalVoicePanel(screen *MainScreen) *DigitalVoicePanel {
 	p.start = simpleui.NewButton("digitalVoiceStart", 378, 530, 148, 38, "START", 14)
 	p.start.SetColors(actionStartFill, colors.green, colors.text)
 	p.start.OnClick(p.toggle)
-	p.allModes = simpleui.NewButton("digitalDetectAll", 538, 530, 112, 38, "TODOS", 13)
+	p.allModes = simpleui.NewButton("digitalDetectAll", 538, 530, 112, 38, "ALL", 13)
 	p.allModes.SetColors(colors.blue, colors.cyan, colors.text)
 	p.allModes.OnClick(func() {
 		for _, mode := range digitalDetectionModes {
@@ -41,7 +41,7 @@ func NewDigitalVoicePanel(screen *MainScreen) *DigitalVoicePanel {
 	})
 	p.skipEncrypted = simpleui.NewSwitch("digitalVoiceEncrypted", 1070, 535, 200, 28, "SKIP ENCRYPTED", true, 12)
 	p.skipEncrypted.SetTrackColors(colors.panelAlt, colors.green)
-	p.followCall = simpleui.NewSwitch("digitalVoiceFollow", 1280, 535, 190, 28, "SEGUIR LLAMADA", false, 12)
+	p.followCall = simpleui.NewSwitch("digitalVoiceFollow", 1280, 535, 190, 28, "FOLLOW CALL", false, 12)
 	p.followCall.SetTrackColors(colors.panelAlt, colors.blue)
 	p.controls = []simpleui.Element{p.start, p.allModes, p.skipEncrypted, p.followCall}
 	x := float32(538)
@@ -104,7 +104,7 @@ func (p *DigitalVoicePanel) backendMode() string {
 		return selected[0]
 	}
 	if len(selected) == len(digitalDetectionModes) {
-		return "AUTO · TODOS"
+		return "AUTO · ALL"
 	}
 	return strings.Join(selected, "|")
 }
@@ -222,7 +222,7 @@ func (p *DigitalVoicePanel) DrawPanel() {
 	simpleui.DrawTextStyled(protocol+slotSuffix(status.Slot), call.X+15, call.Y+10, 19, simpleui.FontSemiBold, stateColor)
 	voice := "NO VOICE"
 	if status.VoiceActive {
-		voice = "VOZ CLARA"
+		voice = "CLEAR VOICE"
 	}
 	if status.Encrypted {
 		voice = "ENCRYPTED VOICE"
@@ -234,7 +234,7 @@ func (p *DigitalVoicePanel) DrawPanel() {
 		return colors.green
 	}())
 	simpleui.DrawText(fmt.Sprintf("TG / DESTINATION   %s", fallback(status.Target)), call.X+15, call.Y+43, 13, colors.text)
-	simpleui.DrawText(fmt.Sprintf("RADIO / ORIGEN %s", fallback(status.Source)), call.X+15, call.Y+66, 13, colors.text)
+	simpleui.DrawText(fmt.Sprintf("RADIO / SOURCE %s", fallback(status.Source)), call.X+15, call.Y+66, 13, colors.text)
 	detail := status.Detail
 	if p.lastError != "" {
 		detail = p.lastError
@@ -252,7 +252,7 @@ func (p *DigitalVoicePanel) DrawPanel() {
 	drawPanel(context.X, context.Y, context.Width, context.Height)
 	simpleui.DrawTextStyled("PROTOCOL DATA", context.X+14, context.Y+10, 13, simpleui.FontSemiBold, colors.cyan)
 	simpleui.DrawText("SLOT  "+fallback(status.Slot)+"    CC  "+fallback(status.ColorCode)+"    NAC  "+fallback(status.NAC), context.X+14, context.Y+38, 12, colors.text)
-	simpleui.DrawText("RAN   "+fallback(status.RAN)+"    SYSTEM  "+fallback(status.System)+"    SITIO  "+fallback(status.Site), context.X+14, context.Y+61, 12, colors.text)
+	simpleui.DrawText("RAN   "+fallback(status.RAN)+"    SYSTEM  "+fallback(status.System)+"    SITE  "+fallback(status.Site), context.X+14, context.Y+61, 12, colors.text)
 	duration := "--:--"
 	if status.VoiceActive && !status.StartedAt.IsZero() {
 		duration = time.Since(status.StartedAt).Truncate(time.Second).String()
@@ -268,7 +268,7 @@ func (p *DigitalVoicePanel) drawActivity(x, y, w, h float32, events []digitalvoi
 	simpleui.DrawText("TIME", x+12, y+28, 11, colors.muted)
 	simpleui.DrawText("MODE", x+82, y+28, 11, colors.muted)
 	simpleui.DrawText("SLOT", x+172, y+28, 11, colors.muted)
-	simpleui.DrawText("ORIGEN", x+242, y+28, 11, colors.muted)
+	simpleui.DrawText("SOURCE", x+242, y+28, 11, colors.muted)
 	simpleui.DrawText("DESTINATION / DETAIL", x+350, y+28, 11, colors.muted)
 	if len(events) == 0 {
 		simpleui.DrawText("Waiting for a digital transmission", x+12, y+50, 12, colors.muted)

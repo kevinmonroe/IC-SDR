@@ -57,7 +57,7 @@ func NewTETRAPanel(screen *MainScreen) *TETRAPanel {
 		p.feedback = "COUNTERS RESET"
 	})
 	clear.SetColors(actionClearFill, colors.red, colors.text)
-	p.listenSelector = simpleui.NewDropdown("tetraListenSlot", 1120, toolY+137, 175, 34, "ESCUCHA", []string{"AUTO", "TS1", "TS2", "TS3", "TS4"}, 13)
+	p.listenSelector = simpleui.NewDropdown("tetraListenSlot", 1120, toolY+137, 175, 34, "LISTEN", []string{"AUTO", "TS1", "TS2", "TS3", "TS4"}, 13)
 	p.listenSelector.SetSelected(0)
 	p.listenSelector.OnChange(func(index int, _ string) { p.listenSlot = index; p.applyAudioPolicy() })
 	p.controls = append(p.controls, p.listenSelector)
@@ -66,13 +66,13 @@ func NewTETRAPanel(screen *MainScreen) *TETRAPanel {
 	p.clearOnlySwitch.SetTrackColors(colors.red, colors.green)
 	p.controls = append(p.controls, p.clearOnlySwitch)
 	p.autoCenter = true
-	p.autoCenterSwitch = simpleui.NewSwitch("tetraAutoCenter", 1175, toolY+28, 140, 34, "AUTO CENTRO", true, 12)
+	p.autoCenterSwitch = simpleui.NewSwitch("tetraAutoCenter", 1175, toolY+28, 140, 34, "AUTO CENTER", true, 12)
 	p.autoCenterSwitch.OnChange(func(active bool) { p.autoCenter = active })
 	p.autoCenterSwitch.SetTrackColors(colors.panelAlt, colors.green)
 	p.controls = append(p.controls, p.autoCenterSwitch)
 	viewer := button("tetraViewer", "DATA", 1325, 80, p.openViewer)
 	viewer.SetColors(colors.blue, colors.border, colors.text)
-	p.topmostSwitch = simpleui.NewSwitch("tetraViewerTopmost", 1415, toolY+28, 140, 34, "1er PLANO", p.viewerTopmost, 12)
+	p.topmostSwitch = simpleui.NewSwitch("tetraViewerTopmost", 1415, toolY+28, 140, 34, "ALWAYS ON TOP", p.viewerTopmost, 12)
 	p.topmostSwitch.SetTrackColors(colors.panelAlt, colors.green)
 	p.topmostSwitch.OnChange(func(active bool) {
 		p.viewerTopmost = active
@@ -170,11 +170,11 @@ func (p *TETRAPanel) applyAudioPolicy() {
 	if p.listenSlot > 0 {
 		mode = fmt.Sprintf("TS%d", p.listenSlot)
 	}
-	p.feedback = "ESCUCHA " + mode
+	p.feedback = "LISTENING TO " + mode
 	if p.clearOnly {
 		p.feedback += " · OPEN ONLY"
 	} else {
-		p.feedback += " · INCLUYE CIFRADA"
+		p.feedback += " · INCLUDE ENCRYPTED"
 	}
 }
 func (p *TETRAPanel) Close() {
@@ -286,7 +286,7 @@ func (p *TETRAPanel) readViewerCommand() {
 	if p.screen.receiver != nil {
 		p.screen.receiver.ClearTETRA()
 	}
-	p.feedback = fmt.Sprintf("NEIGHBOR CELL · %.6f MHz · DATA REINICIADOS", float64(command.TuneHz)/1e6)
+	p.feedback = fmt.Sprintf("NEIGHBOR CELL · %.6f MHz · DATA RESET", float64(command.TuneHz)/1e6)
 	p.nextSnapshot = time.Time{}
 }
 
@@ -375,7 +375,7 @@ func (p *TETRAPanel) DrawPanel() {
 		simpleui.DrawText(fmt.Sprintf("TS%d", i+1), x-12, toolY+119, 12, colors.text)
 	}
 	if status.ActiveAudioSlot > 0 {
-		label, color := fmt.Sprintf("TS OBJETIVO TS%d · WAITING TCH", status.ActiveAudioSlot), colors.orange
+		label, color := fmt.Sprintf("TARGET TS%d · WAITING FOR TCH", status.ActiveAudioSlot), colors.orange
 		if status.AudioFrames > 0 && time.Since(status.LastAudio) < time.Second {
 			label, color = fmt.Sprintf("PLAYING TS%d", status.ActiveAudioSlot), colors.green
 		}
@@ -388,15 +388,15 @@ func (p *TETRAPanel) DrawPanel() {
 	// shifts every field whenever a signed value gains or loses a digit.
 	drawTETRAStatusField("STATUS", status.State, toolContentX, toolY+72, 185)
 	drawTETRAStatusField("LEVEL", fmt.Sprintf("%6.1f dBFS", status.LevelDBFS), 555, toolY+72, 125)
-	drawTETRAStatusField("CALIDAD", fmt.Sprintf("%3.0f %%", status.Quality), 690, toolY+72, 115)
+	drawTETRAStatusField("QUALITY", fmt.Sprintf("%3.0f %%", status.Quality), 690, toolY+72, 115)
 	drawTETRAStatusField("AFC", fmt.Sprintf("%+6.0f Hz", status.FrequencyErrorHz), 815, toolY+72, 120)
-	drawTETRAStatusField("CENTRO", fmt.Sprintf("%+6.0f Hz", p.centerError), 945, toolY+72, 145)
+	drawTETRAStatusField("CENTER", fmt.Sprintf("%+6.0f Hz", p.centerError), 945, toolY+72, 145)
 	simpleui.DrawText(fmt.Sprintf("18 ksym/s · BER %5.2f%% · FER %5.1f%% · SYNC %d · NTS %d · AACH %d/%d · SCH %d/%d · MAC %d · CMCE %d", status.BER, status.FER, status.SyncHits, status.NormalBursts, status.AACHValid, status.AACHRejected, status.SCHValid, status.SCHCRCFailures, status.MACResources, status.CMCEEvents), toolContentX, toolY+99, 13, colors.muted)
 	if !status.LastSync.IsZero() {
 		simpleui.DrawText("LAST SYNC  "+status.LastSync.Format("15:04:05"), toolContentX, toolY+124, 13, colors.green)
 	}
 	if status.System.Valid {
-		simpleui.DrawText(fmt.Sprintf("RED  MCC %d · MNC %d · COLOR %d · TS %d · FN %d · MF %d", status.System.MCC, status.System.MNC, status.System.ColourCode, status.System.Timeslot, status.System.Frame, status.System.Multiframe), toolContentX, toolY+148, 13, colors.green)
+		simpleui.DrawText(fmt.Sprintf("NETWORK  MCC %d · MNC %d · COLOR %d · TS %d · FN %d · MF %d", status.System.MCC, status.System.MNC, status.System.ColourCode, status.System.Timeslot, status.System.Frame, status.System.Multiframe), toolContentX, toolY+148, 13, colors.green)
 	}
 	constellation := rl.Rectangle{X: 1310, Y: toolY + 72, Width: 150, Height: 108}
 	rl.DrawRectangleRec(constellation, colors.background)

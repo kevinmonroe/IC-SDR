@@ -102,7 +102,7 @@ func (d *Decoder) Start(mode string) error {
 		return err
 	}
 	d.cmd, d.stdin = cmd, stdin
-	d.status.State, d.status.Detail, d.status.Running = "BUSCANDO", "Automatic detection active", true
+	d.status.State, d.status.Detail, d.status.Running = "SEARCHING", "Automatic detection active", true
 	d.status.StartedAt = time.Now()
 	d.mu.Unlock()
 	go d.runWriter()
@@ -146,7 +146,7 @@ func modeArgument(mode string) string {
 // available; the other scoped presets publish mono.
 func modeOutputChannels(mode string) int {
 	switch strings.ToUpper(strings.TrimSpace(mode)) {
-	case "AUTO · TODOS", "DMR", "P25 II", "X2-TDMA":
+	case "AUTO · ALL", "DMR", "P25 II", "X2-TDMA":
 		return 2
 	default:
 		return 1
@@ -213,7 +213,7 @@ func (d *Decoder) Snapshot() Status {
 	if s.VoiceActive && !s.LastVoice.IsZero() && time.Since(s.LastVoice) > time.Second {
 		s.VoiceActive = false
 		if s.Running {
-			s.State = "BUSCANDO"
+			s.State = "SEARCHING"
 		}
 	}
 	return s

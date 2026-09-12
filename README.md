@@ -6,6 +6,18 @@
 
 IC-SDR combines reception, demodulation, spectrum analysis, and digital-signal decoding in a desktop interface designed for everyday use.
 
+## About this fork
+
+This repository is an English-language fork of
+[LuislopezMartinez/IC-SDR](https://github.com/LuislopezMartinez/IC-SDR). It keeps
+the upstream v0.5.0 radio features while translating the interface, status and
+error messages, build output, documentation, tests, and bundled default
+configuration labels into English.
+
+The translation does not add decryption or change transmission permissions.
+IC-SDR is a receiver application; always follow the laws and band rules that
+apply where you operate it.
+
 > [!IMPORTANT]
 > IC-SDR is designed specifically for **Windows**. After building the portable package, the executable and all required components are placed in `dist/IC-SDR-Go`.
 
@@ -114,11 +126,25 @@ To create the portable Windows distribution:
 powershell -ExecutionPolicy Bypass -File .\build-release.ps1
 ```
 
-The distribution is created in `dist/IC-SDR-Go`. See [DISTRIBUTION.md](DISTRIBUTION.md) for more information about the portable package and data directories.
+The portable build also requires the upstream runtime assets under
+`ORIGEN/IC_SDR`. That directory is intentionally not versioned because it
+contains bundled executables, DLLs, and other runtime files. The script stops
+with a clear error if an asset is missing or if the required DSD-neo runtime is
+not version 2.9.0.
+
+The distribution is created in `dist/IC-SDR-Go`. See
+[DISTRIBUTION.md](DISTRIBUTION.md) for details about the portable package and
+data directories.
 
 ## Data and configuration
 
-Settings, memories, recordings, captures, exports, and logs are stored under `DATA`. User-generated data is not included in the repository.
+Settings, memories, recordings, captures, exports, and logs are stored under
+`DATA`. The repository includes English-labeled default files in `DATA/config`;
+cache files, logs, recordings, exports, and captures are ignored by Git.
+
+The bundled memories are upstream Spain/Barcelona examples. Treat them as
+starting points, verify frequencies against current official sources, and
+replace them with a local receive-only list as needed.
 
 ## Project status
 

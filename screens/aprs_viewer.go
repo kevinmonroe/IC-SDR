@@ -16,10 +16,10 @@ func RunAPRSViewer(path string) {
 	simpleui.SetMode(1450, 760, simpleui.Fit)
 	simpleui.SetCanvasFilter(rl.FilterPoint)
 	simpleui.SetTextScale(1.35)
-	simpleui.SetTitle("IC-SDR · Capturas APRS")
+	simpleui.SetTitle("IC-SDR · APRS Captures")
 	simpleui.SetMinimumSize(920, 520)
 	v := &aprsViewer{path: path, selected: -1}
-	export := simpleui.NewButton("aprsViewerExport", 1210, 18, 210, 44, "EXPORTAR CSV", 15)
+	export := simpleui.NewButton("aprsViewerExport", 1210, 18, 210, 44, "EXPORT CSV", 15)
 	export.SetColors(colors.green, colors.border, colors.text)
 	export.OnClick(func() {
 		saved, err := exportAPRSCSV(v.packets)
@@ -62,7 +62,7 @@ func (v *aprsViewer) read() {
 func (v *aprsViewer) draw() {
 	v.read()
 	rl.DrawRectangle(0, 0, 1450, 760, colors.background)
-	simpleui.DrawTextStyled("CAPTURAS APRS", 28, 24, 22, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("APRS CAPTURES", 28, 24, 22, simpleui.FontSemiBold, colors.cyan)
 	simpleui.DrawText(fmt.Sprintf("%d packets · live-updating table", len(v.packets)), 28, 54, 13, colors.muted)
 	if time.Now().Before(v.until) {
 		simpleui.DrawTextStyled(v.feedback, 910, 35, 13, simpleui.FontSemiBold, colors.green)
@@ -70,7 +70,7 @@ func (v *aprsViewer) draw() {
 	headers := []struct {
 		x float32
 		s string
-	}{{28, "DATE / TIME"}, {195, "CALLSIGN"}, {315, "TYPE"}, {420, "DESTINATION"}, {530, "RUTA"}, {750, "POSITION"}, {950, "LEVEL"}, {1020, "INFORMATION"}}
+	}{{28, "DATE / TIME"}, {195, "CALLSIGN"}, {315, "TYPE"}, {420, "DESTINATION"}, {530, "PATH"}, {750, "POSITION"}, {950, "LEVEL"}, {1020, "INFORMATION"}}
 	rl.DrawRectangle(20, 82, 1410, 34, colors.panelAlt)
 	for _, h := range headers {
 		simpleui.DrawTextStyled(h.s, h.x, 91, 13, simpleui.FontSemiBold, colors.cyan)
@@ -118,7 +118,7 @@ func (v *aprsViewer) draw() {
 		simpleui.DrawText(short(p.Summary, 49), 1020, y, 12, colors.text)
 	}
 	drawPanel(20, 610, 1410, 125)
-	simpleui.DrawTextStyled("TRAMA AX.25 / APRS", 32, 620, 13, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("AX.25 / APRS FRAME", 32, 620, 13, simpleui.FontSemiBold, colors.cyan)
 	if v.selected >= 0 && v.selected < len(v.packets) {
 		p := v.packets[v.selected]
 		drawWrapped(p.Raw, 32, 646, 1375, 13, colors.text)

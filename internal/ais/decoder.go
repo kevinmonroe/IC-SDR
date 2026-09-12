@@ -235,7 +235,7 @@ func (d *Decoder) mergeLocked(m message) {
 	v.Messages++
 	d.vessels[m.MMSI] = v
 	d.messages++
-	d.state = "RECIBIENDO"
+	d.state = "RECEIVING"
 }
 func (d *Decoder) ProcessIQ(iq []float32) {
 	d.mu.Lock()

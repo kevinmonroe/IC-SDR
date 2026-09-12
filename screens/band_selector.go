@@ -45,7 +45,7 @@ var bandsByCategory = map[string][]BandDefinition{
 		{Category: "COMMERCIAL", Name: "MARINE", FrequencyHz: 156_800_000, SpanHz: 1_000_000},
 		{Category: "COMMERCIAL", Name: "MARINE AIS", FrequencyHz: 162_000_000, SpanHz: 250_000},
 		{Category: "COMMERCIAL", Name: "DAB", FrequencyHz: 220_352_000, SpanHz: 2_000_000},
-		{Category: "COMMERCIAL", Name: "SONDAS", FrequencyHz: 403_000_000, SpanHz: 250_000},
+		{Category: "COMMERCIAL", Name: "RADIOSONDES", FrequencyHz: 403_000_000, SpanHz: 250_000},
 		{Category: "COMMERCIAL", Name: "UAT 978", FrequencyHz: 978_000_000, SpanHz: 2_000_000},
 		{Category: "COMMERCIAL", Name: "ADS-B 1090", FrequencyHz: 1_090_000_000, SpanHz: 2_000_000},
 	},
@@ -144,7 +144,7 @@ func (selector *BandSelector) DrawOverlay() {
 	rl.DrawRectangleRounded(rl.Rectangle{X: 130, Y: 70, Width: 10, Height: 530}, .5, 8, accent)
 	simpleui.DrawTextStyled("BAND SELECTION", 170, 91, 27, simpleui.FontRegular, colors.text)
 
-	labels := []string{"RADIOAFICIONADO / HAM", "COMERCIALES", "ISM / LIBRE"}
+	labels := []string{"AMATEUR RADIO / HAM", "COMMERCIAL", "ISM / UNLICENSED"}
 	for index, label := range labels {
 		bounds := selector.categoryBounds(index)
 		active := []string{"HAM", "COMMERCIAL", "ISM"}[index] == selector.category
@@ -245,5 +245,5 @@ func formatBandFrequency(frequencyHz int64) string {
 		return fmt.Sprintf("%d Hz", frequencyHz)
 	}
 	formatted = strings.TrimRight(strings.TrimRight(strings.Split(formatted, " ")[0], "0"), ".") + " " + strings.Split(formatted, " ")[1]
-	return strings.Replace(formatted, ".", ",", 1)
+	return formatted
 }

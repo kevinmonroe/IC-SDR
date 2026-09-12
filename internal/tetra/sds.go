@@ -22,7 +22,7 @@ func parseSDS(bits []byte, ssi uint32, now time.Time) (Message, *Position, bool)
 		if !ok {
 			return Message{}, nil, false
 		}
-		message.Kind, message.Text, message.Recognized = "SDS TEXTO", text, true
+		message.Kind, message.Text, message.Recognized = "SDS TEXT", text, true
 		return message, nil, true
 	case 10: // Location Information Protocol
 		position, ok := parseShortLIP(payload, ssi, now)
@@ -39,13 +39,13 @@ func parseSDS(bits []byte, ssi uint32, now time.Time) (Message, *Position, bool)
 func sdsProtocolName(protocol uint8) string {
 	switch protocol {
 	case 2:
-		return "TEXTO SIMPLE"
+		return "SIMPLE TEXT"
 	case 9:
-		return "TEXTO INMEDIATO"
+		return "IMMEDIATE TEXT"
 	case 10:
 		return "SIMPLE LOCATION SYSTEM / LIP"
 	default:
-		return fmt.Sprintf("PROTOCOLO %d", protocol)
+		return fmt.Sprintf("PROTOCOL %d", protocol)
 	}
 }
 

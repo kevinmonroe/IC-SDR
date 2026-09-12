@@ -29,14 +29,14 @@ func NewRecorderPanel(screen *MainScreen, recorder *AudioRecorder) *RecorderPane
 	p.record = simpleui.NewButton("audioRecord", 1300, 445, 132, 36, "RECORD", uiControlFontSize)
 	p.record.SetColors(rl.Color{R: 145, G: 38, B: 42, A: 255}, rl.Color{R: 255, G: 95, B: 95, A: 255}, colors.text)
 	p.pause = simpleui.NewButton("audioRecordPause", 1442, 445, 138, 36, "PAUSE", uiControlFontSize)
-	p.skip = simpleui.NewSwitch("audioRecordSkipSQL", 1300, 489, 280, 30, "OMITIR SILENCIO SQL", screen.recorderSkipSilence, uiMinimumFontSize)
+	p.skip = simpleui.NewSwitch("audioRecordSkipSQL", 1300, 489, 280, 30, "SKIP SQL SILENCE", screen.recorderSkipSilence, uiMinimumFontSize)
 	p.format = simpleui.NewButton("audioRecordFormat", 1300, 525, 98, 32, "MP3", 13)
 	p.folder = simpleui.NewButton("audioRecordFolder", 1406, 525, 174, 32, "OPEN FOLDER", 13)
 	p.toolRecord = simpleui.NewButton("toolAudioRecord", 35, 715, 135, 40, "RECORD", uiControlFontSize)
 	p.toolRecord.SetColors(rl.Color{R: 145, G: 38, B: 42, A: 255}, rl.Color{R: 255, G: 95, B: 95, A: 255}, colors.text)
 	p.toolPause = simpleui.NewButton("toolAudioPause", 180, 715, 135, 40, "PAUSE", uiControlFontSize)
-	p.toolSkip = simpleui.NewSwitch("toolAudioSkipSQL", 330, 715, 270, 40, "OMITIR SILENCIO SQL", screen.recorderSkipSilence, 13)
-	p.toolFormat = simpleui.NewButton("toolAudioFormat", 35, 766, 150, 42, "FORMATO MP3", 13)
+	p.toolSkip = simpleui.NewSwitch("toolAudioSkipSQL", 330, 715, 270, 40, "SKIP SQL SILENCE", screen.recorderSkipSilence, 13)
+	p.toolFormat = simpleui.NewButton("toolAudioFormat", 35, 766, 150, 42, "FORMAT MP3", 13)
 	p.toolFolder = simpleui.NewButton("toolAudioFolder", 195, 766, 405, 42, "OPEN RECORDINGS FOLDER", 14)
 	startStop := p.ToggleRecording
 	togglePause := p.TogglePause
@@ -123,7 +123,7 @@ func (p *RecorderPanel) refresh() {
 	p.format.SetEnabled(!state.Recording)
 	p.toolFormat.SetEnabled(!state.Recording)
 	p.format.SetLabel(state.Format)
-	p.toolFormat.SetLabel("FORMATO " + state.Format)
+	p.toolFormat.SetLabel("FORMAT " + state.Format)
 	p.skip.SetActive(state.SkipSquelchSilence)
 	p.toolSkip.SetActive(state.SkipSquelchSilence)
 }
@@ -261,7 +261,7 @@ func (p *RecorderPanel) DrawPanel() {
 	drawRecorderMeter(330, 650, 270, 38, state.PeakDBFS, state.Recording && !state.Paused)
 	detail := recorderFormatDescription(state.Format) + " · ONE FILE PER SESSION"
 	if state.Encoding {
-		detail = "CREANDO MP3…"
+		detail = "CREATING MP3…"
 	} else if state.LastError != "" {
 		detail = trimMemory(state.LastError, 72)
 	}

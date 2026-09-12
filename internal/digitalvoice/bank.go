@@ -44,7 +44,7 @@ func (b *Bank) Start(selection string) error {
 		modes = strings.Split(selection, "|")
 	}
 	if len(modes) == 0 {
-		modes = []string{"AUTO · TODOS"}
+		modes = []string{"AUTO · ALL"}
 	}
 	b.mu.Lock()
 	for range modes {

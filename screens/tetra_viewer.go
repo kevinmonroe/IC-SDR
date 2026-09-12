@@ -12,7 +12,7 @@ import (
 	"go-zero/simpleui"
 )
 
-var tetraTabs = []string{"RED", "CELDAS", "GROUPS", "USUARIOS", "MESSAGES", "GPS", "CONSOLA"}
+var tetraTabs = []string{"NETWORK", "CELLS", "GROUPS", "USERS", "MESSAGES", "GPS", "CONSOLE"}
 
 func RunTETRAViewer(path, settingsPath string) {
 	simpleui.SetMode(1400, 780, simpleui.Fit)
@@ -22,7 +22,7 @@ func RunTETRAViewer(path, settingsPath string) {
 	// the minimum window dimensions.
 	simpleui.SetCanvasFilter(rl.FilterBilinear)
 	simpleui.SetTextScale(1.55)
-	simpleui.SetTitle("IC-SDR · Monitor TETRA")
+	simpleui.SetTitle("IC-SDR · TETRA Monitor")
 	simpleui.SetMinimumSize(700, 390)
 	v := &tetraViewer{path: path, settingsPath: settingsPath}
 	simpleui.Run(v.draw)
@@ -75,7 +75,7 @@ func (v *tetraViewer) draw() {
 	v.read()
 	v.readSettings()
 	rl.DrawRectangle(0, 0, 1400, 780, colors.background)
-	simpleui.DrawTextStyled("MONITOR TETRA", 28, 22, 24, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("TETRA MONITOR", 28, 22, 24, simpleui.FontSemiBold, colors.cyan)
 	state := v.snapshot.Status.State
 	if state == "" {
 		state = "WAITING FOR DATA"
@@ -115,7 +115,7 @@ func (v *tetraViewer) draw() {
 }
 
 func (v *tetraViewer) drawNeighbours() {
-	simpleui.DrawTextStyled("CELDAS VECINAS · D-NWRK-BROADCAST", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("NEIGHBOR CELLS · D-NWRK-BROADCAST", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
 	if len(v.snapshot.Neighbours) == 0 {
 		simpleui.DrawText("Waiting for neighboring-cell announcements…", 48, 235, 14, colors.muted)
 		return
@@ -123,7 +123,7 @@ func (v *tetraViewer) drawNeighbours() {
 	columns := []struct {
 		x    float32
 		text string
-	}{{48, "CELDA"}, {145, "FREQUENCY"}, {350, "CARRIER"}, {480, "MCC"}, {560, "MNC"}, {650, "LA"}, {750, "SYNC"}, {850, "SERVICIO"}, {990, "VOZ"}, {1090, "UPDATED"}}
+	}{{48, "CELL"}, {145, "FREQUENCY"}, {350, "CARRIER"}, {480, "MCC"}, {560, "MNC"}, {650, "LA"}, {750, "SYNC"}, {850, "SERVICE"}, {990, "VOICE"}, {1090, "UPDATED"}}
 	for _, column := range columns {
 		simpleui.DrawTextStyled(column.text, column.x, 215, 12, simpleui.FontSemiBold, colors.cyan)
 	}
@@ -135,7 +135,7 @@ func (v *tetraViewer) drawNeighbours() {
 		if i%2 == 0 {
 			rl.DrawRectangle(38, int32(y-3), 1300, 27, colors.panel)
 		}
-		frequency := "DESCONOCIDA"
+		frequency := "UNKNOWN"
 		if n.FrequencyHz > 0 {
 			frequency = fmt.Sprintf("%.6f MHz", float64(n.FrequencyHz)/1e6)
 		}
@@ -169,7 +169,7 @@ func (v *tetraViewer) drawNeighbours() {
 	simpleui.DrawText("Click a cell with a known frequency to tune it.", 48, 704, 12, colors.muted)
 }
 func (v *tetraViewer) drawGroups() {
-	simpleui.DrawTextStyled("LLAMADAS Y DESTINOS CMCE", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("CMCE CALLS AND DESTINATIONS", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
 	if len(v.snapshot.Calls) > 0 {
 		for _, column := range []struct {
 			x float32
@@ -190,7 +190,7 @@ func (v *tetraViewer) drawGroups() {
 			if call.Active {
 				stateColor, activity = colors.green, "ACTIVE"
 			}
-			cipher := "CLARO"
+			cipher := "CLEAR"
 			cipherColor := colors.green
 			if call.Encrypted {
 				cipher, cipherColor = "ENCRYPTED", colors.orange
@@ -207,7 +207,7 @@ func (v *tetraViewer) drawGroups() {
 	}
 	simpleui.DrawText("Showing destinations observed in clear signaling; waiting for a confirmed Call ID.", 48, 207, 12, colors.muted)
 	if len(v.snapshot.Groups) == 0 {
-		simpleui.DrawText("WAITING D-SETUP, D-CONNECT o D-TX GRANTED…", 48, 260, 14, colors.muted)
+		simpleui.DrawText("WAITING FOR D-SETUP, D-CONNECT, OR D-TX GRANTED…", 48, 260, 14, colors.muted)
 		return
 	}
 	for i, g := range v.snapshot.Groups {
@@ -226,7 +226,7 @@ func (v *tetraViewer) drawGroups() {
 	}
 }
 func (v *tetraViewer) drawMessages() {
-	simpleui.DrawTextStyled("EVENTOS CMCE / SDS", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("CMCE / SDS EVENTS", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
 	if len(v.snapshot.Messages) == 0 {
 		simpleui.DrawText("Waiting for unencrypted CMCE signaling…", 48, 235, 14, colors.muted)
 		return
@@ -234,7 +234,7 @@ func (v *tetraViewer) drawMessages() {
 	columns := []struct {
 		x    float32
 		text string
-	}{{48, "TIME"}, {150, "TYPE"}, {315, "SSI"}, {425, "PARTY SSI"}, {550, "TS"}, {590, "PROTOCOLO"}, {755, "CIF."}, {805, "CONTENT / DIAGNOSTICS"}}
+	}{{48, "TIME"}, {150, "TYPE"}, {315, "SSI"}, {425, "PARTY SSI"}, {550, "TS"}, {590, "PROTOCOL"}, {755, "ENC."}, {805, "CONTENT / DIAGNOSTICS"}}
 	for _, column := range columns {
 		simpleui.DrawTextStyled(column.text, column.x, 210, 11, simpleui.FontSemiBold, colors.cyan)
 	}
@@ -289,11 +289,11 @@ func viewerSSI(ssi uint32) string {
 	return fmt.Sprintf("%08d", ssi)
 }
 func (v *tetraViewer) drawUsers() {
-	simpleui.DrawTextStyled("USUARIOS DETECTADOS · MAC-RESOURCE", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("DETECTED USERS · MAC-RESOURCE", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
 	cols := []struct {
 		x     float32
 		label string
-	}{{48, "SSI"}, {260, "TYPE"}, {430, "TIMESLOT"}, {590, "ENCRYPTED"}, {760, "VISTO"}, {940, "LAST ACTIVITY"}}
+	}{{48, "SSI"}, {260, "TYPE"}, {430, "TIMESLOT"}, {590, "ENCRYPTED"}, {760, "SEEN"}, {940, "LAST ACTIVITY"}}
 	for _, c := range cols {
 		simpleui.DrawTextStyled(c.label, c.x, 220, 13, simpleui.FontSemiBold, colors.cyan)
 	}
@@ -310,7 +310,7 @@ func (v *tetraViewer) drawUsers() {
 			rl.DrawRectangle(38, int32(y-3), 1300, 26, colors.panel)
 		}
 		kind := map[uint8]string{1: "SSI", 3: "USSI", 4: "SMI", 5: "SSI+EVENT", 6: "SSI+USAGE", 7: "SMI+EVENT"}[u.AddressType]
-		enc, color := "CLARO", colors.green
+		enc, color := "CLEAR", colors.green
 		if u.Encrypted {
 			enc, color = "ENCRYPTED", colors.orange
 		}
@@ -324,7 +324,7 @@ func (v *tetraViewer) drawUsers() {
 }
 func (v *tetraViewer) drawNetwork() {
 	s := v.snapshot.Status
-	simpleui.DrawTextStyled("RED Y CELDA SERVIDORA", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("NETWORK AND SERVING CELL", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
 	if !s.System.Valid {
 		simpleui.DrawText("Waiting for a valid BSCH block…", 48, 220, 15, colors.muted)
 		return
@@ -339,7 +339,7 @@ func (v *tetraViewer) drawNetwork() {
 	}
 	simpleui.DrawText(fmt.Sprintf("SYNC %d · NTS1 %d · CRC failures %d · quality %.0f%%", s.SyncHits, s.NormalBursts, s.BSCHFailures, s.Quality), 48, 505, 14, colors.green)
 	if s.Network.Valid {
-		simpleui.DrawText(fmt.Sprintf("SYSINFO · PORTADORA %d · BAND %d · DL %.6f MHz · UL %.6f MHz · LA %d · SERVICIOS %03X", s.Network.MainCarrier, s.Network.FrequencyBand, float64(s.Network.DownlinkHz)/1e6, float64(s.Network.UplinkHz)/1e6, s.Network.LocationArea, s.Network.ServiceDetails), 48, 530, 13, colors.cyan)
+		simpleui.DrawText(fmt.Sprintf("SYSINFO · CARRIER %d · BAND %d · DL %.6f MHz · UL %.6f MHz · LA %d · SERVICES %03X", s.Network.MainCarrier, s.Network.FrequencyBand, float64(s.Network.DownlinkHz)/1e6, float64(s.Network.UplinkHz)/1e6, s.Network.LocationArea, s.Network.ServiceDetails), 48, 530, 13, colors.cyan)
 	}
 	simpleui.DrawTextStyled("ACTIVITY BY TIMESLOT", 48, 565, 14, simpleui.FontSemiBold, colors.cyan)
 	maxBursts := uint64(1)
@@ -358,12 +358,12 @@ func (v *tetraViewer) drawNetwork() {
 }
 func (v *tetraViewer) drawEmpty(title string, count int, hint string) {
 	simpleui.DrawTextStyled(title, 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
-	simpleui.DrawText(fmt.Sprintf("%d elementos", count), 48, 212, 14, colors.text)
+	simpleui.DrawText(fmt.Sprintf("%d items", count), 48, 212, 14, colors.text)
 	simpleui.DrawText(hint, 48, 260, 14, colors.muted)
 	simpleui.DrawText("This window receives the live snapshot and will keep this tab during the next protocol phase.", 48, 292, 13, colors.muted)
 }
 func (v *tetraViewer) drawGPS() {
-	simpleui.DrawTextStyled("POSICIONES GPS / LIP", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("GPS / LIP POSITIONS", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
 	mapBox := rl.Rectangle{X: 48, Y: 220, Width: 900, Height: 480}
 	rl.DrawRectangleRec(mapBox, rl.Color{R: 8, G: 17, B: 24, A: 255})
 	rl.DrawRectangleLinesEx(mapBox, 1, colors.border)

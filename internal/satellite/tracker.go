@@ -84,7 +84,7 @@ type Tracker struct {
 }
 
 var groups = []struct{ Name, Query string }{
-	{"Estaciones espaciales", "stations"}, {"Radioaficionados", "amateur"},
+	{"Space Stations", "stations"}, {"Amateur Radio", "amateur"},
 	{"CubeSats", "cubesat"}, {"WEATHER", "weather"},
 	{"GPS", "gps-ops"}, {"Galileo", "galileo"}, {"GLONASS", "glo-ops"}, {"BeiDou", "beidou"},
 	{"Iridium NEXT", "iridium-NEXT"}, {"Orbcomm", "orbcomm"}, {"Starlink", "starlink"},
@@ -435,13 +435,13 @@ func (t *Tracker) loadCache() error {
 func applyKnownSignals(s *Satellite) {
 	switch s.NORAD {
 	case 25544:
-		s.Signals = []Signal{{"Voz / SSTV", "FM", 145800000}, {"APRS", "AFSK", 145825000}}
+		s.Signals = []Signal{{"Voice / SSTV", "FM", 145800000}, {"APRS", "AFSK", 145825000}}
 	case 43700:
-		s.Signals = []Signal{{"Baliza PSK", "BPSK", 10489750000}, {"Transpondedor NB", "SSB/CW", 10489500000}, {"Transpondedor WB", "DVB-S2", 10491000000}}
+		s.Signals = []Signal{{"PSK Beacon", "BPSK", 10489750000}, {"NB Transponder", "SSB/CW", 10489500000}, {"WB Transponder", "DVB-S2", 10491000000}}
 	}
 }
 func fallbackCatalog() []Satellite {
-	raw := [][4]string{{"ISS (ZARYA)", "Estaciones espaciales", "1 25544U 98067A   25250.50000000  .00012000  00000-0  22000-3 0  9991", "2 25544  51.6340 150.0000 0004000 100.0000 260.0000 15.50000000123456"}, {"QO-100 (ES'HAIL 2)", "Radioaficionados", "1 43700U 18090A   25250.50000000  .00000010  00000-0  00000-0 0  9991", "2 43700   0.0150  85.0000 0001800 270.0000  90.0000  1.00270000 25000"}}
+	raw := [][4]string{{"ISS (ZARYA)", "Space Stations", "1 25544U 98067A   25250.50000000  .00012000  00000-0  22000-3 0  9991", "2 25544  51.6340 150.0000 0004000 100.0000 260.0000 15.50000000123456"}, {"QO-100 (ES'HAIL 2)", "Amateur Radio", "1 43700U 18090A   25250.50000000  .00000010  00000-0  00000-0 0  9991", "2 43700   0.0150  85.0000 0001800 270.0000  90.0000  1.00270000 25000"}}
 	out := make([]Satellite, 0, len(raw))
 	for _, v := range raw {
 		sat, _ := makeSatellite(v[0], v[2], v[3], v[1])

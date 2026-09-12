@@ -31,3 +31,13 @@ To rebuild this distribution from source:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\build-release.ps1
 ```
+
+The release script requires the upstream runtime assets under
+`ORIGEN\IC_SDR`; that directory is not included in this Git repository. The
+script verifies the required components, checks that DSD-neo 2.9.0 matches its
+manifest, preserves mutable `DATA` folders from an existing portable build,
+and writes the finished package to `dist\IC-SDR-Go`.
+
+The default memory file contains translated Spain/Barcelona examples. Verify
+frequencies against current official sources before relying on them. Receiving
+a listed frequency does not grant permission to transmit.

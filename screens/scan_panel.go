@@ -290,7 +290,7 @@ func (p *ScanPanel) DrawPanel() {
 		}
 		return colors.muted
 	}())
-	simpleui.DrawTextStyled(fmt.Sprintf("RANGO %.5f–%.5f MHz  ·  DISPARO SQL %d dBm", float64(p.minimumHz)/1e6, float64(p.maximumHz)/1e6, p.screen.squelchThreshold), 720, 645, 13, simpleui.FontSemiBold, colors.muted)
+	simpleui.DrawTextStyled(fmt.Sprintf("RANGE %.5f–%.5f MHz  ·  SQL TRIGGER %d dBm", float64(p.minimumHz)/1e6, float64(p.maximumHz)/1e6, p.screen.squelchThreshold), 720, 645, 13, simpleui.FontSemiBold, colors.muted)
 	memoryColor := rl.Color{R: 45, G: 58, B: 72, A: 255}
 	memoryDetail := "OFF · Tune the peak"
 	if p.centerToMemory {
@@ -312,7 +312,7 @@ func (p *ScanPanel) DrawPanel() {
 		saveColor = rl.Color{R: 24, G: 125, B: 70, A: 255}
 	}
 	drawScanButton(918, 678, 190, 58, saveTitle, saveDetail, saveColor)
-	drawScanButton(1122, 678, 260, 58, "DURANTE LA ESCUCHA  ▾", p.policyDescription(), rl.Color{R: 45, G: 58, B: 72, A: 255})
+	drawScanButton(1122, 678, 260, 58, "WHILE LISTENING  ▾", p.policyDescription(), rl.Color{R: 45, G: 58, B: 72, A: 255})
 	if p.choiceMenu != "" {
 		p.drawChoiceStrip()
 	} else {
@@ -495,17 +495,17 @@ func (p *ScanPanel) displayStatus() string {
 	case p.status == "READY":
 		return "READY"
 	case p.status == "SCANNING":
-		return "BUSCANDO TRANSMISIONES"
+		return "SEARCHING FOR TRANSMISSIONS"
 	case p.status == "HOLD":
-		return "ESCUCHA RETENIDA"
+		return "LISTENING HELD"
 	case strings.HasPrefix(p.status, "VERIFY"):
-		return "VERIFICANDO" + strings.TrimPrefix(p.status, "VERIFY")
+		return "VERIFYING" + strings.TrimPrefix(p.status, "VERIFY")
 	case strings.HasPrefix(p.status, "SIGNAL"):
-		return "ESCUCHANDO" + strings.TrimPrefix(p.status, "SIGNAL")
+		return "LISTENING" + strings.TrimPrefix(p.status, "SIGNAL")
 	case strings.HasPrefix(p.status, "LISTENING"):
-		return "ESCUCHANDO" + strings.TrimPrefix(p.status, "LISTENING")
+		return p.status
 	case strings.HasPrefix(p.status, "JUMP"):
-		return "CAMBIO" + strings.TrimPrefix(p.status, "JUMP")
+		return "JUMP" + strings.TrimPrefix(p.status, "JUMP")
 	default:
 		return p.status
 	}

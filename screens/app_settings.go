@@ -205,8 +205,13 @@ func loadAppSettings(path string, screen *MainScreen) {
 	if settings.RTL433BandwidthHz == 250_000 || settings.RTL433BandwidthHz == 500_000 || settings.RTL433BandwidthHz == 1_000_000 || settings.RTL433BandwidthHz == 2_000_000 {
 		screen.rtl433BandwidthHz = settings.RTL433BandwidthHz
 	}
-	if settings.APRSView == "PAQUETES" || settings.APRSView == "ESTACIONES" || settings.APRSView == "MESSAGES" || settings.APRSView == "RADAR" || settings.APRSView == "RAW" {
+	switch settings.APRSView {
+	case "PACKETS", "STATIONS", "MESSAGES", "RADAR", "RAW":
 		screen.aprsView = settings.APRSView
+	case "PAQUETES": // Preserve settings created by the original Spanish build.
+		screen.aprsView = "PACKETS"
+	case "ESTACIONES":
+		screen.aprsView = "STATIONS"
 	}
 	if settings.SubtoneMode == "AUTO" || settings.SubtoneMode == "CTCSS" || settings.SubtoneMode == "DCS" || settings.SubtoneMode == "OFF" {
 		screen.subtoneMode = settings.SubtoneMode

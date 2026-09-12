@@ -117,7 +117,7 @@ func Run(draw func()) {
 
 	traceLifecycle("Raylib: configuring window flags")
 	rl.SetConfigFlags(runtime.windowFlags)
-	traceLifecycle("Raylib: llamando a InitWindow (%dx%d)", runtime.width, runtime.height)
+	traceLifecycle("Raylib: calling InitWindow (%dx%d)", runtime.width, runtime.height)
 	windowWidth, windowHeight := runtime.width, runtime.height
 	if runtime.initialWidth > 0 && runtime.initialHeight > 0 {
 		windowWidth, windowHeight = runtime.initialWidth, runtime.initialHeight
@@ -131,7 +131,7 @@ func Run(draw func()) {
 	}
 	traceLifecycle("Raylib: creating primary render texture")
 	runtime.canvas = NewCanvas(runtime.width, runtime.height, runtime.mode)
-	traceLifecycle("Raylib: render texture creada · id=%d", runtime.canvas.target.Texture.ID)
+	traceLifecycle("Raylib: render texture created · id=%d", runtime.canvas.target.Texture.ID)
 
 	defer func() {
 		unloadFonts()

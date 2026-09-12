@@ -45,11 +45,11 @@ func NewUtilitiesSidebar(screen *MainScreen) *UtilitiesSidebar {
 		return b
 	}
 	p.scan = button("utilityScan", "START", 24, 339, 150, 34, screen.scanPanel.ToggleRunning)
-	p.scanLayer = simpleui.NewSwitch("utilityScanLayer", 170, 237, 164, 28, "MOSTRAR EN FFT", true, 11)
+	p.scanLayer = simpleui.NewSwitch("utilityScanLayer", 170, 237, 164, 28, "SHOW ON FFT", true, 11)
 	p.scanLayer.SetTrackColors(colors.panelAlt, colors.green)
 	p.scanLayer.OnChange(func(active bool) { screen.scanPanel.overlayVisible = active })
 	p.controls = append(p.controls, p.scanLayer)
-	p.scanRange = button("utilityScanRange", "RANGO FFT", 182, 339, 152, 34, func() {
+	p.scanRange = button("utilityScanRange", "FFT RANGE", 182, 339, 152, 34, func() {
 		x := screen.centerFrequencyHz
 		half := screen.spanHz / 2
 		screen.scanPanel.minimumHz, screen.scanPanel.maximumHz = x-half+screen.spanHz/10, x+half-screen.spanHz/10
@@ -61,7 +61,7 @@ func NewUtilitiesSidebar(screen *MainScreen) *UtilitiesSidebar {
 		screen.scanPanel.resume = values[(i+1)%len(values)]
 		screen.markSettingsDirty()
 	})
-	p.scanMem = button("utilityScanMemory", "AJUSTE MEM", 182, 298, 152, 31, func() {
+	p.scanMem = button("utilityScanMemory", "MEMORY TUNING", 182, 298, 152, 31, func() {
 		screen.scanPanel.centerToMemory = !screen.scanPanel.centerToMemory
 		screen.markSettingsDirty()
 	})

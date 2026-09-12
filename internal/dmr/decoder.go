@@ -612,7 +612,7 @@ func (d *Decoder) resetSessionLocked() {
 	d.rawState, d.confirmed, d.confirmationStreak = "SEARCH", false, 0
 	d.pendingAudio = d.pendingAudio[:0]
 	d.candidateSince, d.lastTrustedTelemetry, d.lastTelemetry = time.Time{}, time.Time{}, time.Time{}
-	d.status.State, d.status.Detail = "SEARCH", "Buscando sincronismo"
+	d.status.State, d.status.Detail = "SEARCHING", "Searching for synchronization"
 	d.status.ColorCode, d.status.InputLevel, d.status.SyncQuality = -1, 0, 0
 	d.status.PLLLocked, d.status.Slot1, d.status.Slot2 = false, "--", "--"
 }

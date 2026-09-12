@@ -39,7 +39,7 @@ func NewDMRPanel(screen *MainScreen) *DMRPanel {
 	p.auto = p.button("dmrAuto", 1280, 699, 82, 42, "AUTO", colors.blue)
 	p.ts1 = p.button("dmrTS1", 1370, 699, 80, 42, "TS1", colors.panelAlt)
 	p.ts2 = p.button("dmrTS2", 1458, 699, 80, 42, "TS2", colors.panelAlt)
-	p.resync = p.button("dmrResync", 1280, 754, 154, 48, "RESINCRONIZAR", colors.orange)
+	p.resync = p.button("dmrResync", 1280, 754, 154, 48, "RESYNC", colors.orange)
 	p.resync.SetColors(colors.orange, colors.border, colors.background)
 	p.clear = p.button("dmrClear", 1442, 754, 96, 48, "CLEAR", colors.panelAlt)
 	p.clear.SetColors(actionClearFill, colors.red, colors.text)
@@ -48,7 +48,7 @@ func NewDMRPanel(screen *MainScreen) *DMRPanel {
 	p.ts2.OnClick(func() { p.selectSlot("TS2") })
 	p.resync.OnClick(func() {
 		if screen.receiver != nil && screen.receiver.ResyncDMR() {
-			p.add("SYSTEM", "--", "RESTART manual solicitado")
+			p.add("SYSTEM", "--", "Manual restart requested")
 		}
 	})
 	p.clear.OnClick(func() { p.events = nil })
@@ -149,9 +149,9 @@ func (p *DMRPanel) DrawPanel() {
 		cc = fmt.Sprint(status.ColorCode)
 	}
 	simpleui.DrawText(fmt.Sprintf("COLOR CODE  %s", cc), 52, 711, 13, colors.text)
-	simpleui.DrawText(fmt.Sprintf("PLL  %s", map[bool]string{true: "BLOQUEADO", false: "NO LOCK"}[status.PLLLocked]), 52, 734, 13, colors.text)
+	simpleui.DrawText(fmt.Sprintf("PLL  %s", map[bool]string{true: "LOCKED", false: "UNLOCKED"}[status.PLLLocked]), 52, 734, 13, colors.text)
 	simpleui.DrawText(fmt.Sprintf("SYNC %d   LEVEL %d", status.SyncQuality, status.InputLevel), 52, 757, 13, colors.text)
-	simpleui.DrawText(fmt.Sprintf("COLA %d/%d   DROP %d   UND %d", status.Queued, status.Capacity, status.Dropped, p.screen.stats.AudioUnderflows), 52, 780, 12, colors.muted)
+	simpleui.DrawText(fmt.Sprintf("QUEUE %d/%d   DROPPED %d   UNDERFLOW %d", status.Queued, status.Capacity, status.Dropped, p.screen.stats.AudioUnderflows), 52, 780, 12, colors.muted)
 	p.drawSlot(262, 665, "TIME SLOT 1", status.Slot1, p.screen.dmrAudioSlot == "TS1")
 	p.drawSlot(262, 738, "TIME SLOT 2", status.Slot2, p.screen.dmrAudioSlot == "TS2")
 	p.drawEvents(530, 665, 730, 142)

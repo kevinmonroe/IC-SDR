@@ -12,11 +12,11 @@ func TestParseSDSSimpleText(t *testing.T) {
 	bits := appendBits(nil, 2, 8)
 	bits = appendBits(bits, 0, 1) // no timestamp
 	bits = appendBits(bits, 1, 7) // 8-bit character coding
-	for _, b := range []byte("HOLA") {
+	for _, b := range []byte("HELLO") {
 		bits = appendBits(bits, uint32(b), 8)
 	}
 	message, position, ok := parseSDS(bits, 6009004, time.Unix(123, 0))
-	if !ok || position != nil || message.Kind != "SDS TEXTO" || message.PartySSI != 6009004 || !strings.Contains(message.Text, "HOLA") {
+	if !ok || position != nil || message.Kind != "SDS TEXT" || message.PartySSI != 6009004 || !strings.Contains(message.Text, "HELLO") {
 		t.Fatalf("unexpected SDS result: ok=%v position=%v message=%+v", ok, position, message)
 	}
 }

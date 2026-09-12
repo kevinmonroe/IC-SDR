@@ -93,7 +93,7 @@ func NewMemoryPanel(screen *MainScreen) *MemoryPanel {
 	p.markerView = simpleui.NewButton("memoryMarkerView", 1487, 665, 73, 25, "VIEW B", 9)
 	p.tune = simpleui.NewButton("memoryTune", 1355, 692, 205, 25, "TUNE", 12)
 	p.edit = simpleui.NewButton("memoryEdit", 1355, 719, 205, 25, "EDIT", 12)
-	p.duplicate = simpleui.NewButton("memoryDuplicate", 1355, 746, 205, 25, "DUPLICAR", 12)
+	p.duplicate = simpleui.NewButton("memoryDuplicate", 1355, 746, 205, 25, "DUPLICATE", 12)
 	p.move = simpleui.NewButton("memoryMove", 1355, 773, 205, 25, "MOVE", 12)
 	p.remove = simpleui.NewButton("memoryDelete", 1355, 800, 205, 25, "DELETE", 12)
 	p.add.SetColors(rl.Color{R: 20, G: 105, B: 70, A: 255}, colors.green, colors.text)
@@ -862,7 +862,7 @@ func (p *MemoryPanel) cycleEditMode() {
 }
 
 func (p *MemoryPanel) drawEditModalContent() {
-	labels := []string{"NAME", "FREQUENCY (MHz)", "GROUP (CLIC PARA CAMBIAR)", "MODE (CLIC PARA CAMBIAR)", "FILTER (Hz)", "STEP (Hz)", "DESCRIPTION"}
+	labels := []string{"NAME", "FREQUENCY (MHz)", "GROUP (CLICK TO CHANGE)", "MODE (CLICK TO CHANGE)", "FILTER (Hz)", "STEP (Hz)", "DESCRIPTION"}
 	values := []string{p.pendingMemory.Name, fmt.Sprintf("%.6f", float64(p.pendingMemory.FrequencyHz)/1e6), p.pendingMemory.Group + "   >", p.pendingMemory.Mode + "   >", strconv.Itoa(p.pendingMemory.FilterBandwidthHz), strconv.FormatInt(p.pendingMemory.StepHz, 10), trimMemory(p.pendingMemory.Description, 72)}
 	for i, bounds := range p.editFieldBounds() {
 		simpleui.DrawText(labels[i], bounds.X, bounds.Y-22, 13, colors.muted)
@@ -990,7 +990,7 @@ func (p *MemoryPanel) drawSaveModalContent() {
 	drawCentered(detail, rl.Rectangle{X: 490, Y: 374, Width: 620, Height: 28}, 16, colors.cyan)
 	if len(p.duplicateNames) > 0 {
 		drawCentered("THIS FREQUENCY IS ALREADY SAVED", rl.Rectangle{X: 490, Y: 420, Width: 620, Height: 28}, 16, colors.orange)
-		drawCentered("Existente: "+strings.Join(p.duplicateNames, ", "), rl.Rectangle{X: 490, Y: 452, Width: 620, Height: 24}, 13, colors.text)
+		drawCentered("Existing: "+strings.Join(p.duplicateNames, ", "), rl.Rectangle{X: 490, Y: 452, Width: 620, Height: 24}, 13, colors.text)
 		drawCentered("A second memory will be saved on the same frequency.", rl.Rectangle{X: 490, Y: 478, Width: 620, Height: 22}, 12, colors.muted)
 	}
 }
@@ -1381,9 +1381,9 @@ func (p *MemoryPanel) DrawMarkerTooltip(x, y, w, h float32) bool {
 		description = "No description"
 	}
 	simpleui.DrawTextStyled(trimMemory(description, 51), cardX+14, cardY+91, 13, simpleui.FontRegular, mainText)
-	status := "SCAN INACTIVO"
+	status := "SCAN INACTIVE"
 	if m.ScanEnabled {
-		status = "SCAN ACTIVO"
+		status = "SCAN ACTIVE"
 	}
 	priority := ""
 	if m.Priority {

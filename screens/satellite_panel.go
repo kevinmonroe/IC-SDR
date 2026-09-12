@@ -75,7 +75,7 @@ func NewSatellitePanel(screen *MainScreen) *SatellitePanel {
 	tune.SetColors(actionStartFill, colors.green, colors.text)
 	update := button("satelliteUpdate", "UPDATE", 1435, 140, p.update)
 	update.SetColors(actionExportFill, colors.blue, colors.text)
-	mapButton := button("satelliteMap", "▦  MAPA", 1290, 285, p.openMap)
+	mapButton := button("satelliteMap", "▦  MAP", 1290, 285, p.openMap)
 	mapButton.SetBounds(rl.Rectangle{X: 1290, Y: toolY + 78, Width: 285, Height: 30})
 	mapButton.SetColors(colors.blue, colors.border, colors.text)
 	station := p.tracker.Station()
@@ -403,7 +403,7 @@ func (p *SatellitePanel) openMap() {
 	p.writeSnapshot(true)
 	if p.viewer != nil && p.viewer.Process != nil {
 		focusRTL433Viewer(p.viewer.Process.Pid)
-		p.feedback = "MAPA YA ABIERTO"
+		p.feedback = "MAP ALREADY OPEN"
 		return
 	}
 	exe, err := os.Executable()
@@ -421,7 +421,7 @@ func (p *SatellitePanel) openMap() {
 	p.viewerDone = make(chan struct{})
 	done := p.viewerDone
 	go func() { _ = cmd.Wait(); close(done) }()
-	p.feedback = "MAPA ABIERTO"
+	p.feedback = "MAP OPENED"
 }
 
 func (p *SatellitePanel) DrawPanel() {
@@ -433,10 +433,10 @@ func (p *SatellitePanel) DrawPanel() {
 			break
 		}
 	}
-	eye := "BAJO EL HORIZONTE"
+	eye := "BELOW THE HORIZON"
 	c := colors.muted
 	if selected.Visible {
-		eye = "VISIBLE DESDE " + snap.Station.Name
+		eye = "VISIBLE FROM " + snap.Station.Name
 		c = colors.green
 	}
 	simpleui.DrawText("SATELLITES · "+selected.Name+" · "+eye, 40, toolY+7, 12, c)

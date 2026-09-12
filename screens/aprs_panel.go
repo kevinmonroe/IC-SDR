@@ -33,12 +33,12 @@ type APRSPanel struct {
 }
 
 func NewAPRSPanel(screen *MainScreen) *APRSPanel {
-	p := &APRSPanel{screen: screen, view: "PAQUETES", buttons: map[string]*simpleui.Button{}, selected: -1, snapshotPath: resources.WritablePath("cache", "aprs-captures.json")}
+	p := &APRSPanel{screen: screen, view: "PACKETS", buttons: map[string]*simpleui.Button{}, selected: -1, snapshotPath: resources.WritablePath("cache", "aprs-captures.json")}
 	items := []struct {
 		id, label string
 		w         float32
 		color     rl.Color
-	}{{"PAQUETES", "PAQUETES", 120, colors.blue}, {"ESTACIONES", "ESTACIONES", 130, colors.panelAlt}, {"MESSAGES", "MESSAGES", 120, colors.panelAlt}, {"RADAR", "RADAR", 100, colors.panelAlt}, {"RAW", "RAW", 85, colors.panelAlt}}
+	}{{"PACKETS", "PACKETS", 120, colors.blue}, {"STATIONS", "STATIONS", 130, colors.panelAlt}, {"MESSAGES", "MESSAGES", 120, colors.panelAlt}, {"RADAR", "RADAR", 100, colors.panelAlt}, {"RAW", "RAW", 85, colors.panelAlt}}
 	x := float32(40)
 	for _, item := range items {
 		b := simpleui.NewButton("aprs"+item.id, x, 660, item.w, 40, item.label, uiControlFontSize)
@@ -62,7 +62,7 @@ func NewAPRSPanel(screen *MainScreen) *APRSPanel {
 	popout := simpleui.NewButton("aprsPopout", 845, 660, 170, 40, "OPEN TABLE", uiControlFontSize)
 	popout.SetColors(colors.blue, colors.border, colors.text)
 	popout.OnClick(p.openViewer)
-	export := simpleui.NewButton("aprsExport", 1025, 660, 180, 40, "EXPORTAR CSV", uiControlFontSize)
+	export := simpleui.NewButton("aprsExport", 1025, 660, 180, 40, "EXPORT CSV", uiControlFontSize)
 	export.SetColors(colors.green, colors.border, colors.background)
 	export.OnClick(p.export)
 	clearButton := simpleui.NewButton("aprsClear", 1215, 660, 125, 40, "CLEAR", uiControlFontSize)
@@ -196,7 +196,7 @@ func (p *APRSPanel) openViewer() {
 	p.writeSnapshot(p.packets())
 	if p.viewer != nil && p.viewer.Process != nil {
 		focusRTL433Viewer(p.viewer.Process.Pid)
-		p.say("TABLA YA ABIERTA")
+		p.say("TABLE ALREADY OPEN")
 		return
 	}
 	executable, err := os.Executable()
@@ -214,7 +214,7 @@ func (p *APRSPanel) openViewer() {
 	p.viewerDone = make(chan struct{})
 	done := p.viewerDone
 	go func() { _ = cmd.Wait(); close(done) }()
-	p.say("TABLA ABIERTA")
+	p.say("TABLE OPENED")
 }
 func (p *APRSPanel) filtered() []aprs.Packet {
 	packets := p.packets()
@@ -227,7 +227,7 @@ func (p *APRSPanel) filtered() []aprs.Packet {
 		}
 		return out
 	}
-	if p.view == "ESTACIONES" {
+	if p.view == "STATIONS" {
 		seen := map[string]bool{}
 		out := []aprs.Packet{}
 		for _, packet := range packets {
@@ -247,7 +247,7 @@ func (p *APRSPanel) DrawPanel() {
 	}
 	simpleui.DrawTextStyled("APRS RX · AFSK 1200 / AX.25", 40, 638, 16, simpleui.FontSemiBold, rl.Color{R: 55, G: 215, B: 195, A: 255})
 	stateColor := colors.orange
-	if status.State == "RECIBIENDO" {
+	if status.State == "RECEIVING" {
 		stateColor = colors.green
 	} else if status.State == "ERROR" {
 		stateColor = colors.red
@@ -255,9 +255,9 @@ func (p *APRSPanel) DrawPanel() {
 	rl.DrawCircle(720, 646, 6, stateColor)
 	simpleui.DrawTextStyled(fmt.Sprintf("%s · %.3f MHz · LEVEL %s · RX %d · ERR %+.0f Hz", status.State, float64(p.screen.frequencyHz)/1e6, levelText(status.AudioLevel), status.PacketCount, status.FrequencyErrorHz), 735, 638, 12, simpleui.FontSemiBold, colors.muted)
 	drawPanel(40, 712, 220, 94)
-	simpleui.DrawTextStyled("RECEPTOR", 52, 721, 12, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("RECEIVER", 52, 721, 12, simpleui.FontSemiBold, colors.cyan)
 	simpleui.DrawText(fmt.Sprintf("KISS  %s", map[bool]string{true: "CONECTADO", false: "WAITING"}[status.KISS]), 52, 745, 13, colors.text)
-	simpleui.DrawText(fmt.Sprintf("COLA %d/16 · DROP %d", status.Queued, status.Dropped), 52, 766, 12, colors.text)
+	simpleui.DrawText(fmt.Sprintf("QUEUE %d/16 · DROPPED %d", status.Queued, status.Dropped), 52, 766, 12, colors.text)
 	simpleui.DrawText(short(status.Detail, 28), 52, 787, 12, colors.muted)
 	if p.view == "RADAR" {
 		p.drawRadar()
@@ -279,7 +279,7 @@ func (p *APRSPanel) drawTable(packets []aprs.Packet) {
 	headers := []struct {
 		x float32
 		s string
-	}{{288, "TIME"}, {365, "CALLSIGN"}, {485, "TYPE"}, {590, "DESTINATION"}, {700, "RUTA"}, {900, "POSITION / MESSAGE"}, {1230, "LEVEL"}}
+	}{{288, "TIME"}, {365, "CALLSIGN"}, {485, "TYPE"}, {590, "DESTINATION"}, {700, "PATH"}, {900, "POSITION / MESSAGE"}, {1230, "LEVEL"}}
 	for _, h := range headers {
 		simpleui.DrawTextStyled(h.s, h.x, 718, 12, simpleui.FontSemiBold, colors.cyan)
 	}
@@ -315,7 +315,7 @@ func (p *APRSPanel) drawTable(packets []aprs.Packet) {
 		info := packet.Summary
 		if p.view == "RAW" {
 			info = packet.Raw
-		} else if p.view == "ESTACIONES" && packet.Coordinates != "—" {
+		} else if p.view == "STATIONS" && packet.Coordinates != "—" {
 			info = packet.Coordinates + " · " + packet.Summary
 		}
 		simpleui.DrawText(short(info, 43), 900, y, 12, colors.text)
@@ -392,7 +392,7 @@ func exportAPRSCSV(packets []aprs.Packet) (string, error) {
 	_, _ = f.Write([]byte{0xef, 0xbb, 0xbf})
 	w := csv.NewWriter(f)
 	w.Comma = ';'
-	_ = w.Write(strings.Split("date;TIME;CALLSIGN;DESTINATION;ruta;TYPE;simbolo;coordenadas;locator;HEADING;SPEED;ALTITUDE;destino_mensaje;id_mensaje;temperatura;humedad;presion;viento;lluvia;LEVEL;informacion;trama_raw", ";"))
+	_ = w.Write(strings.Split("date;time;callsign;destination;path;type;symbol;coordinates;locator;heading;speed;altitude;message_target;message_id;temperature;humidity;pressure;wind;rain;level;information;raw_frame", ";"))
 	for _, p := range packets {
 		_ = w.Write([]string{p.Received.Format("2006-01-02"), p.Received.Format("15:04:05"), p.Source, p.Destination, p.Path, p.Type, p.Symbol, p.Coordinates, p.Locator, p.Course, p.Speed, p.Altitude, p.MessageTarget, p.MessageID, p.Temperature, p.Humidity, p.Pressure, p.Wind, p.Rain, strconv.Itoa(p.ReceiveLevel), p.Summary, p.Raw})
 	}

@@ -356,7 +356,7 @@ func (d *Decoder) Snapshot() Status {
 	if time.Since(d.activeAudioSeen) > 5*time.Second {
 		activeAudioSlot = 0
 	}
-	codecReady, codecError := false, "CODEC NO CONFIGURADO"
+	codecReady, codecError := false, "CODEC NOT CONFIGURED"
 	codecReady = true
 	for _, voice := range d.voice {
 		if voice == nil || !voice.ready {
@@ -560,12 +560,12 @@ func (d *Decoder) run(queue <-chan []float32, stop <-chan struct{}, done chan<- 
 						d.syncHits++
 						d.lastSyncBit = d.totalBits
 						d.lastSync = time.Now()
-						d.state = "SYNC TETRA REAL"
+						d.state = "VALID TETRA SYNC"
 						start := len(bits) - len(syncTraining) - 120
 						if start >= 0 {
 							if si, ok := decodeBSCH(bits[start : start+120]); ok {
 								d.system = si
-								d.state = "BSCH DECODIFICADO"
+								d.state = "BSCH DECODED"
 							} else {
 								d.bschFailures++
 							}
@@ -631,7 +631,7 @@ func (d *Decoder) run(queue <-chan []float32, stop <-chan struct{}, done chan<- 
 				d.timingError = float32(math.Sqrt(math.Max(timingScore[timingPhase], 0)))
 				d.points = append(d.points[:0], points...)
 				if time.Since(d.lastSync) > 2*time.Second {
-					d.state = "BUSCANDO SYNC / NTS1"
+					d.state = "SEARCHING FOR SYNC / NTS1"
 				}
 				d.mu.Unlock()
 				phaseErrorSum, freqSum, powerSum = 0, 0, 0
@@ -713,10 +713,10 @@ func (d *Decoder) processNormalBurst(burst []byte, slot int, ndb2 bool) {
 		if aachOK && usage > 3 && !secondHalfStolen {
 			if d.activeAudioSlot != int8(slot+1) || time.Since(d.activeAudioSeen) > 5*time.Second {
 				d.audioRejectedUnselected++
-				d.lastAudioDecision = fmt.Sprintf("TS%d NDB2 NO SELECCIONADO", slot+1)
+				d.lastAudioDecision = fmt.Sprintf("TS%d NDB2 NOT SELECTED", slot+1)
 			} else if d.clearAudioOnly && d.slotEncrypted[slot] != 0 {
 				d.audioRejectedEncrypted++
-				d.lastAudioDecision = fmt.Sprintf("TS%d NDB2 ENCRYPTED O DESCONOCIDO", slot+1)
+				d.lastAudioDecision = fmt.Sprintf("TS%d NDB2 ENCRYPTED OR UNKNOWN", slot+1)
 			} else if half := descrambleBlock(coded[216:], si); half != nil {
 				voiceBits := make([]byte, 432)
 				copy(voiceBits[216:], half)
@@ -764,7 +764,7 @@ func (d *Decoder) processMACPayloadLocked(payload []byte, slot int) {
 		case 2:
 			if network, valid := parseMACSysinfo(pdu); valid {
 				d.network = network
-				d.state = "SYSINFO DECODIFICADO"
+				d.state = "SYSINFO DECODED"
 			}
 			// Broadcast PDUs occupy their logical channel; remaining decoded
 			// bits are padding rather than another concatenated MAC PDU.
@@ -777,13 +777,13 @@ func (d *Decoder) processMACPayloadLocked(payload []byte, slot int) {
 
 func (d *Decoder) processVoiceLocked(coded []byte, si SystemInfo, slot int) {
 	if d.onAudio == nil || slot < 0 || slot > 3 {
-		d.lastAudioDecision = "SALIDA DE AUDIO UNAVAILABLE"
+		d.lastAudioDecision = "AUDIO OUTPUT UNAVAILABLE"
 		return
 	}
 	if d.clearAudioOnly && d.slotEncrypted[slot] != 0 {
 		d.audioRejectedEncrypted++
 		if d.slotEncrypted[slot] < 0 {
-			d.lastAudioDecision = fmt.Sprintf("TS%d ENCRYPTED DESCONOCIDO", slot+1)
+			d.lastAudioDecision = fmt.Sprintf("TS%d ENCRYPTION STATUS UNKNOWN", slot+1)
 		} else {
 			d.lastAudioDecision = fmt.Sprintf("TS%d ENCRYPTED", slot+1)
 		}
@@ -791,13 +791,13 @@ func (d *Decoder) processVoiceLocked(coded []byte, si SystemInfo, slot int) {
 	}
 	if d.activeAudioSlot != int8(slot+1) || time.Since(d.activeAudioSeen) > 5*time.Second {
 		d.audioRejectedUnselected++
-		d.lastAudioDecision = fmt.Sprintf("TS%d NO SELECCIONADO", slot+1)
+		d.lastAudioDecision = fmt.Sprintf("TS%d NOT SELECTED", slot+1)
 		return
 	}
 	voice := d.voice[slot]
 	if voice == nil || !voice.ready {
 		d.audioRejectedInactive++
-		d.lastAudioDecision = "CODEC DE VOZ UNAVAILABLE"
+		d.lastAudioDecision = "VOICE CODEC UNAVAILABLE"
 		return
 	}
 	type4 := descrambleFullSlot(coded, si)
@@ -814,7 +814,7 @@ func (d *Decoder) processVoiceBitsLocked(type4 []byte, slot int, stolen bool) {
 	pcm, ok := voice.decode(type4, stolen)
 	if !ok {
 		d.audioRejectedDamaged++
-		d.lastAudioDecision = fmt.Sprintf("TS%d TRAMA DE VOZ RECHAZADA", slot+1)
+		d.lastAudioDecision = fmt.Sprintf("TS%d VOICE FRAME REJECTED", slot+1)
 		return
 	}
 	d.audioFrames++
@@ -842,7 +842,7 @@ func (d *Decoder) processMACResourceLocked(payload []byte, slot int) {
 	address, reason, ok := parseMACResourceDetailed(payload)
 	if !ok {
 		d.macRejected++
-		if reason == "ASIGNACION CIFRADA" {
+		if reason == "ENCRYPTED ASSIGNMENT" {
 			d.macEncrypted++
 		}
 		return
@@ -868,7 +868,7 @@ func (d *Decoder) processMACResourceLocked(payload []byte, slot int) {
 	fresh := userFromResource(address, slot+1)
 	fresh.Seen = u.Seen + 1
 	d.users[address.SSI] = fresh
-	d.state = "MAC-RESOURCE DECODIFICADO"
+	d.state = "MAC-RESOURCE DECODED"
 	pdu, llcOK := parseLLC(payload, address)
 	if !llcOK || pdu.FCSInvalid {
 		d.llcRejected++
@@ -914,7 +914,7 @@ func (d *Decoder) processMACResourceLocked(payload []byte, slot int) {
 		if cmce.Code == 0 || cmce.Code == 1 || cmce.Code == 2 || cmce.Code == 7 || cmce.Code == 11 {
 			g := d.groups[address.SSI]
 			g.ID = address.SSI
-			g.Name = "DESTINATION CMCE"
+			g.Name = "CMCE DESTINATION"
 			g.LastSeen = now
 			g.Calls++
 			g.LastEvent = cmce.Kind
@@ -941,7 +941,7 @@ func (d *Decoder) processMACResourceLocked(payload []byte, slot int) {
 				if len(cmce.SDS) >= 8 {
 					protocol = uint8(bitsToUint(cmce.SDS, 0, 8))
 				}
-				d.messages = append([]Message{{Time: now, Kind: "SDS NO INTERPRETADO", Text: fmt.Sprintf("Protocolo %d · %d bits", protocol, len(cmce.SDS)), AddressSSI: address.SSI, PartySSI: caller, Slot: uint8(slot + 1), Encrypted: address.Encrypted, SDS: true, SDSDataType: cmce.SDSDataType, SDSProtocol: protocol, ProtocolName: sdsProtocolName(protocol), RawHex: bitsToHex(cmce.SDS), RawBits: len(cmce.SDS)}}, d.messages...)
+				d.messages = append([]Message{{Time: now, Kind: "UNINTERPRETED SDS", Text: fmt.Sprintf("Protocol %d · %d bits", protocol, len(cmce.SDS)), AddressSSI: address.SSI, PartySSI: caller, Slot: uint8(slot + 1), Encrypted: address.Encrypted, SDS: true, SDSDataType: cmce.SDSDataType, SDSProtocol: protocol, ProtocolName: sdsProtocolName(protocol), RawHex: bitsToHex(cmce.SDS), RawBits: len(cmce.SDS)}}, d.messages...)
 			}
 		} else {
 			d.messages = append([]Message{event}, d.messages...)
@@ -955,7 +955,7 @@ func (d *Decoder) processMACResourceLocked(payload []byte, slot int) {
 			for _, neighbour := range parsed {
 				d.neighbours[neighbour.CellID] = neighbour
 			}
-			d.state = "CELDAS VECINAS DECODIFICADAS"
+			d.state = "NEIGHBOR CELLS DECODED"
 			return
 		}
 		d.llcNonCMCE++

@@ -11,25 +11,25 @@ $digitalVoiceRuntime = Join-Path $projectRoot 'ORIGEN\IC_SDR\tools\digital_voice
 $digitalVoiceManifestPath = Join-Path $digitalVoiceRuntime 'runtime-version.json'
 
 if ($distRoot -ne $expectedDist -or -not $distRoot.StartsWith($projectRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
-    throw "Ruta de distribución no segura: $distRoot"
+    throw "Unsafe distribution path: $distRoot"
 }
 
 # Keep the external runtime and its DLL set versioned as one unit. This catches
 # accidental mixes of an updated executable with stale mbe/codec libraries.
 if (-not (Test-Path -LiteralPath $digitalVoiceManifestPath)) {
-    throw "Falta el manifiesto de DSD-neo: $digitalVoiceManifestPath"
+    throw "DSD-neo manifest is missing: $digitalVoiceManifestPath"
 }
 $digitalVoiceManifest = Get-Content -LiteralPath $digitalVoiceManifestPath -Raw | ConvertFrom-Json
 if ($digitalVoiceManifest.version -ne '2.9.0') {
-    throw "Versión de DSD-neo no admitida: $($digitalVoiceManifest.version). Se esperaba 2.9.0."
+    throw "Unsupported DSD-neo version: $($digitalVoiceManifest.version). Expected 2.9.0."
 }
 $digitalVoiceExe = Join-Path $digitalVoiceRuntime 'bin\dsd-neo.exe'
 foreach ($required in @($digitalVoiceExe, (Join-Path $digitalVoiceRuntime 'bin\mbe-neo.dll'), (Join-Path $digitalVoiceRuntime 'bin\codec2.dll'), (Join-Path $digitalVoiceRuntime 'bin\libexpat.dll'))) {
-    if (-not (Test-Path -LiteralPath $required)) { throw "Falta un componente requerido de DSD-neo 2.9.0: $required" }
+    if (-not (Test-Path -LiteralPath $required)) { throw "A required DSD-neo 2.9.0 component is missing: $required" }
 }
 $digitalVoiceExeHash = (Get-FileHash -LiteralPath $digitalVoiceExe -Algorithm SHA256).Hash.ToLowerInvariant()
 if ($digitalVoiceExeHash -ne $digitalVoiceManifest.executableSha256.ToLowerInvariant()) {
-    throw "El ejecutable DSD-neo no coincide con el manifiesto: $digitalVoiceExeHash"
+    throw "The DSD-neo executable does not match the manifest: $digitalVoiceExeHash"
 }
 
 # Windows locks the executable, runtime DLLs and startup.log while IC-SDR is
@@ -44,7 +44,7 @@ $runningFromDist = @(Get-Process -ErrorAction SilentlyContinue | Where-Object {
 })
 if ($runningFromDist.Count -gt 0) {
     $processList = ($runningFromDist | ForEach-Object { "{0} (PID {1})" -f $_.ProcessName, $_.Id }) -join ', '
-    throw "IC-SDR sigue abierto y Windows mantiene bloqueada la distribución: $processList. Cierre la aplicación y vuelva a ejecutar build-release.ps1."
+    throw "IC-SDR is still open and Windows has locked the distribution: $processList. Close the application and run build-release.ps1 again."
 }
 
 $mutableData = @('cache', 'captures', 'config', 'exports', 'logs', 'recordings')
@@ -64,12 +64,12 @@ New-Item -ItemType Directory -Path $distRoot -Force | Out-Null
 
 if (-not $SkipTests) {
     & go test ./...
-    if ($LASTEXITCODE -ne 0) { throw 'Los tests han fallado.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }
 }
 
 $exePath = Join-Path $distRoot 'IC-SDR-Go.exe'
 & go build -trimpath -ldflags '-s -w -H=windowsgui' -o $exePath .
-if ($LASTEXITCODE -ne 0) { throw 'No se pudo compilar IC-SDR-Go.exe.' }
+if ($LASTEXITCODE -ne 0) { throw 'Could not build IC-SDR-Go.exe.' }
 
 $copies = @(
     @{ Source = 'ORIGEN\IC_SDR\runtime\windows-x64'; Destination = 'DATA\runtime\windows-x64' },
@@ -89,7 +89,7 @@ $copies = @(
 foreach ($copy in $copies) {
     $source = Join-Path $projectRoot $copy.Source
     $destination = Join-Path $distRoot $copy.Destination
-    if (-not (Test-Path -LiteralPath $source)) { throw "Falta un recurso requerido: $source" }
+    if (-not (Test-Path -LiteralPath $source)) { throw "A required resource is missing: $source" }
     $parent = if ((Get-Item -LiteralPath $source).PSIsContainer) { Split-Path $destination -Parent } else { Split-Path $destination -Parent }
     New-Item -ItemType Directory -Path $parent -Force | Out-Null
     Copy-Item -LiteralPath $source -Destination $destination -Recurse -Force
@@ -104,7 +104,7 @@ foreach ($name in $vcRuntimeFiles) {
     if (-not (Test-Path -LiteralPath $bundled)) {
         $systemCopy = Join-Path $env:SystemRoot (Join-Path 'System32' $name)
         if (-not (Test-Path -LiteralPath $systemCopy)) {
-            throw "Falta $name. Instale Microsoft Visual C++ Redistributable x64 antes de crear el portable."
+            throw "$name is missing. Install Microsoft Visual C++ Redistributable x64 before building the portable package."
         }
         Copy-Item -LiteralPath $systemCopy -Destination $bundled -Force
     }
@@ -120,7 +120,7 @@ foreach ($name in $mutableData) {
     }
 }
 
-Copy-Item -LiteralPath (Join-Path $projectRoot 'DISTRIBUTION.md') -Destination (Join-Path $distRoot 'LEEME.txt')
+Copy-Item -LiteralPath (Join-Path $projectRoot 'DISTRIBUTION.md') -Destination (Join-Path $distRoot 'README.txt')
 
 $size = (Get-ChildItem -LiteralPath $distRoot -Recurse -File | Measure-Object Length -Sum).Sum
-Write-Host ("Distribución lista: {0} ({1:N1} MB)" -f $distRoot, ($size / 1MB)) -ForegroundColor Green
+Write-Host ("Distribution ready: {0} ({1:N1} MB)" -f $distRoot, ($size / 1MB)) -ForegroundColor Green

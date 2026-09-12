@@ -235,7 +235,7 @@ func NewMainScreen(receiver *sdr.Receiver) *MainScreen {
 		savedMode:              "USB",
 		dmrAutoCenter:          true,
 		dmrAudioSlot:           "AUTO",
-		aprsView:               "PAQUETES",
+		aprsView:               "PACKETS",
 		rtl433FrequencyHz:      433_920_000,
 		rtl433BandwidthHz:      500_000,
 		sstvAutomatic:          true,
@@ -376,7 +376,7 @@ func (screen *MainScreen) CreateControls() {
 	screen.step = simpleui.NewButton("step", frequencyDialX+9, frequencyPanelY+frequencyPanelH-23, 43, 19, "STEP", 10)
 	screen.stepDown = simpleui.NewButton("stepDown", frequencyDialX+57, frequencyPanelY+frequencyPanelH-23, 27, 19, "-", 13)
 	screen.stepUp = simpleui.NewButton("stepUp", frequencyDialX+197, frequencyPanelY+frequencyPanelH-23, 27, 19, "+", 13)
-	screen.themeButton = simpleui.NewButton("theme", frequencyDialX+183, frequencyPanelY+7, 119, 24, "ESTILO", 10)
+	screen.themeButton = simpleui.NewButton("theme", frequencyDialX+183, frequencyPanelY+7, 119, 24, "THEME", 10)
 	spanDown.OnClick(func() { screen.changeSpan(-1) })
 	spanUp.OnClick(func() { screen.changeSpan(1) })
 	screen.toolMenu = NewToolMenu(screen.activeTool, screen.selectTool)
@@ -1716,7 +1716,7 @@ func recommendedModeForBand(band BandDefinition) string {
 		switch band.Name {
 		case "FM", "DAB":
 			return "WFM"
-		case "MARINE", "SONDAS":
+		case "MARINE", "RADIOSONDES":
 			return "NFM"
 		default:
 			return "AM"

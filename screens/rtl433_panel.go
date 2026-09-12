@@ -53,7 +53,7 @@ func NewRTL433Panel(screen *MainScreen) *RTL433Panel {
 	}
 	table := p.button("rtl433Table", 680, 660, 190, 42, "OPEN TABLE", colors.blue)
 	table.OnClick(p.openViewer)
-	export := p.button("rtl433Export", 885, 660, 180, 42, "EXPORTAR CSV", colors.green)
+	export := p.button("rtl433Export", 885, 660, 180, 42, "EXPORT CSV", colors.green)
 	export.SetColors(colors.green, colors.border, colors.background)
 	export.OnClick(p.exportCSV)
 	clearButton := p.button("rtl433Clear", 1080, 660, 130, 42, "CLEAR", colors.panelAlt)
@@ -146,7 +146,7 @@ func (p *RTL433Panel) selectBandwidth(width int) {
 	p.bandwidthHz = width
 	p.screen.rtl433BandwidthHz = width
 	p.selectFrequency(p.targetHz)
-	p.feedback = "ANCHO " + rtl433WidthLabel(width)
+	p.feedback = "BANDWIDTH " + rtl433WidthLabel(width)
 	p.feedbackUntil = time.Now().Add(2 * time.Second)
 }
 func (p *RTL433Panel) styleWidths() {
@@ -162,11 +162,11 @@ func (p *RTL433Panel) styleWidths() {
 func rtl433WidthLabel(width int) string {
 	switch width {
 	case 250_000:
-		return "250 kHz · ALTA SENSIBILIDAD"
+		return "250 kHz · HIGH SENSITIVITY"
 	case 500_000:
-		return "500 kHz · EQUILIBRADO"
+		return "500 kHz · BALANCED"
 	case 1_000_000:
-		return "1 MHz · BAND ANCHA"
+		return "1 MHz · WIDEBAND"
 	case 2_000_000:
 		return "2 MHz · MAXIMUM COVERAGE"
 	}
@@ -194,7 +194,7 @@ func (p *RTL433Panel) Tick() {
 	if p.screen.activeTool == "RTL_433" && p.pending {
 		if rl.IsKeyPressed(rl.KeyEscape) {
 			p.pending = false
-			p.feedback = "DESPLAZAMIENTO CANCELADO"
+			p.feedback = "FREQUENCY SHIFT CANCELED"
 			p.feedbackUntil = time.Now().Add(2 * time.Second)
 		} else if rl.GetTime() >= p.pendingApplyAt {
 			p.selectFrequency(p.pendingHz)
@@ -223,7 +223,7 @@ func (p *RTL433Panel) Tick() {
 	p.writeSnapshot(events)
 	if controlCopyPressed() && p.selected >= 0 && p.selected < len(events) {
 		rl.SetClipboardText(rtl433ClipboardText(events[p.selected]))
-		p.feedback = "TRAMA COMPLETA COPIADA"
+		p.feedback = "FULL FRAME COPIED"
 		p.feedbackUntil = time.Now().Add(2 * time.Second)
 	}
 	if rl.IsMouseButtonReleased(rl.MouseButtonLeft) {
@@ -292,18 +292,18 @@ func (p *RTL433Panel) DrawPanel() {
 	if p.screen.receiver != nil {
 		status = p.screen.receiver.RTL433Status()
 	}
-	simpleui.DrawTextStyled("RTL_433 · DISPOSITIVOS ISM", 40, 638, 16, simpleui.FontSemiBold, rl.Color{R: 175, G: 145, B: 245, A: 255})
-	simpleui.DrawTextStyled(fmt.Sprintf("%s · %d kS/s · EVENTOS %d · DROP %d", status.State, status.SampleRate/1000, status.Events, status.Dropped), 700, 638, 12, simpleui.FontSemiBold, colors.muted)
-	simpleui.DrawTextStyled(fmt.Sprintf("OBJETIVO %.3f MHz", float64(p.targetHz)/1e6), 1230, 666, 14, simpleui.FontSemiBold, colors.orange)
+	simpleui.DrawTextStyled("RTL_433 · ISM DEVICES", 40, 638, 16, simpleui.FontSemiBold, rl.Color{R: 175, G: 145, B: 245, A: 255})
+	simpleui.DrawTextStyled(fmt.Sprintf("%s · %d kS/s · EVENTS %d · DROPPED %d", status.State, status.SampleRate/1000, status.Events, status.Dropped), 700, 638, 12, simpleui.FontSemiBold, colors.muted)
+	simpleui.DrawTextStyled(fmt.Sprintf("TARGET %.3f MHz", float64(p.targetHz)/1e6), 1230, 666, 14, simpleui.FontSemiBold, colors.orange)
 	drawPanel(40, 716, 300, 90)
-	simpleui.DrawTextStyled("ANCHO IQ DEL DECODER", 52, 719, 12, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("DECODER IQ BANDWIDTH", 52, 719, 12, simpleui.FontSemiBold, colors.cyan)
 	simpleui.DrawText(rtl433WidthLabel(p.bandwidthHz), 52, 781, 12, colors.text)
 	events := p.events()
 	drawPanel(350, 716, 855, 90)
 	headers := []struct {
 		x float32
 		t string
-	}{{365, "TIME"}, {440, "MODELO / TYPE"}, {650, "ID"}, {745, "CANAL"}, {825, "FREC."}, {920, "RSSI/SNR"}, {1025, "DATA"}}
+	}{{365, "TIME"}, {440, "MODEL / TYPE"}, {650, "ID"}, {745, "CHANNEL"}, {825, "FREQ."}, {920, "RSSI/SNR"}, {1025, "DATA"}}
 	for _, h := range headers {
 		simpleui.DrawTextStyled(h.t, h.x, 721, 12, simpleui.FontSemiBold, colors.cyan)
 	}
@@ -431,7 +431,7 @@ func (p *RTL433Panel) openViewer() {
 	p.writeSnapshot(p.events())
 	if p.viewer != nil && p.viewer.Process != nil {
 		focusRTL433Viewer(p.viewer.Process.Pid)
-		p.feedback = "TABLA YA ABIERTA"
+		p.feedback = "TABLE ALREADY OPEN"
 		p.feedbackUntil = time.Now().Add(2 * time.Second)
 		return
 	}
@@ -449,7 +449,7 @@ func (p *RTL433Panel) openViewer() {
 		p.viewerDone = make(chan struct{})
 		done := p.viewerDone
 		go func() { _ = cmd.Wait(); close(done) }()
-		p.feedback = "TABLA ABIERTA"
+		p.feedback = "TABLE OPENED"
 	}
 	p.feedbackUntil = time.Now().Add(2 * time.Second)
 }

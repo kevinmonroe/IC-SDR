@@ -162,7 +162,7 @@ func (p *RadiosondePanel) drawTelemetry(status radiosonde.Status, events []radio
 	columns := []struct {
 		x     float32
 		label string
-	}{{40, "SONDA"}, {240, "RECIBIDA UTC"}, {370, "LATITUDE"}, {500, "LONGITUDE"}, {640, "ALT m"}, {750, "Vh m/s"}, {860, "Vv m/s"}, {975, "T °C"}, {1080, "HR %"}, {1180, "P hPa"}, {1300, "REF. ALT"}}
+	}{{40, "SONDE"}, {240, "RECEIVED UTC"}, {370, "LATITUDE"}, {500, "LONGITUDE"}, {640, "ALT m"}, {750, "Vh m/s"}, {860, "Vv m/s"}, {975, "T °C"}, {1080, "RH %"}, {1180, "P hPa"}, {1300, "ALT REF."}}
 	for _, c := range columns {
 		simpleui.DrawText(c.label, c.x, toolY+72, 12, colors.muted)
 	}

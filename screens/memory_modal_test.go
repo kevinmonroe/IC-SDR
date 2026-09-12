@@ -40,7 +40,7 @@ func TestDeleteMemoryRequiresConfirmation(t *testing.T) {
 
 func TestEditMemoryUsesDialogAndCommitsExplicitValues(t *testing.T) {
 	panel := &MemoryPanel{
-		memories: []MemoryEntry{{Name: "ORIGINAL", Description: "Canal de control", FrequencyHz: 391_662_500, Mode: "TETRA", FilterBandwidthHz: 25_000, StepHz: 12_500, Group: "TETRA"}},
+		memories: []MemoryEntry{{Name: "ORIGINAL", Description: "Control channel", FrequencyHz: 391_662_500, Mode: "TETRA", FilterBandwidthHz: 25_000, StepHz: 12_500, Group: "TETRA"}},
 		selected: 0, selectedGroup: "ALL", pendingEditIndex: -1,
 		path: filepath.Join(t.TempDir(), "memories.json"),
 	}
@@ -49,13 +49,13 @@ func TestEditMemoryUsesDialogAndCommitsExplicitValues(t *testing.T) {
 		t.Fatal("EDIT should open the dialog without changing the memory")
 	}
 	panel.pendingMemory.Name = "TETRA BCN"
-	panel.pendingMemory.Description = "Servicio TETRA de Barcelona"
+	panel.pendingMemory.Description = "Barcelona TETRA service"
 	panel.pendingMemory.FrequencyHz = 391_662_724
 	panel.editField = 5
 	panel.editBuffer = "6250"
 	panel.commitEdit()
 	got := panel.memories[0]
-	if panel.modal != "" || got.Name != "TETRA BCN" || got.Description != "Servicio TETRA de Barcelona" || got.FrequencyHz != 391_662_724 || got.StepHz != 6250 {
+	if panel.modal != "" || got.Name != "TETRA BCN" || got.Description != "Barcelona TETRA service" || got.FrequencyHz != 391_662_724 || got.StepHz != 6250 {
 		t.Fatalf("memory edited incorrectly: %#v", got)
 	}
 }
@@ -73,6 +73,6 @@ func TestAddMemoryOpensEditableFormWithCurrentReceiverValues(t *testing.T) {
 	}
 	got := panel.pendingMemory
 	if got.FrequencyHz != 391_662_500 || got.Mode != "TETRA" || got.FilterBandwidthHz != 25_000 || got.StepHz != 12_500 || got.Group != "TETRA" || !got.ScanEnabled {
-		t.Fatalf("valores iniciales incorrectos: %#v", got)
+		t.Fatalf("incorrect initial values: %#v", got)
 	}
 }

@@ -61,7 +61,7 @@ func (p *AISPanel) SetVisible(v bool) {
 }
 func (p *AISPanel) Enter() {
 	// Opening a tool must never alter the RF tuning. AIS tunes only when the
-	// user explicitly presses INICIAR.
+	// user explicitly presses START.
 }
 func (p *AISPanel) tuneAIS() {
 	s := p.screen
@@ -145,7 +145,7 @@ func (p *AISPanel) openMap() {
 	}
 	if p.viewer != nil && p.viewer.Process != nil {
 		focusRTL433Viewer(p.viewer.Process.Pid)
-		p.feedback = "MAPA YA ABIERTO"
+		p.feedback = "MAP ALREADY OPEN"
 		return
 	}
 	executable, err := os.Executable()
@@ -163,7 +163,7 @@ func (p *AISPanel) openMap() {
 	p.viewerDone = make(chan struct{})
 	done := p.viewerDone
 	go func() { _ = cmd.Wait(); close(done) }()
-	p.feedback = "MAPA ABIERTO"
+	p.feedback = "MAP OPENED"
 }
 func (p *AISPanel) DrawPanel() {
 	status := ais.Status{State: "NO RECEIVER"}

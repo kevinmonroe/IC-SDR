@@ -186,7 +186,7 @@ func (modal *SDRSettings) refreshLabels() {
 	modal.rfLabel.SetText(fmt.Sprintf("LNA / RFGR   STATUS %.0f", modal.current.RFGain))
 	ifText := fmt.Sprintf("IFGR   %.0f dB", modal.current.IFGain)
 	if modal.current.AGC {
-		ifText += "   (CONTROLADO POR AGC)"
+		ifText += "   (CONTROLLED BY AGC)"
 	}
 	modal.ifLabel.SetText(ifText)
 	modal.ppmLabel.SetText(fmt.Sprintf("FREQUENCY CORRECTION   %.1f ppm", modal.current.PPM))

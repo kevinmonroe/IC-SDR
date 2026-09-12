@@ -67,10 +67,10 @@ func openSoapy(config Config) (*soapyDevice, error) {
 		config.trace("SoapySDR: probando driver=%s serial=%q", candidate.Driver, candidate.Serial)
 		device, err := openSoapyCandidate(candidate)
 		if err == nil {
-			config.trace("SoapySDR: driver %s abierto", candidate.Driver)
+			config.trace("SoapySDR: driver %s opened", candidate.Driver)
 			return device, nil
 		}
-		config.trace("SoapySDR: driver %s rechazado: %v", candidate.Driver, err)
+		config.trace("SoapySDR: driver %s rejected: %v", candidate.Driver, err)
 		failures = append(failures, fmt.Errorf("%s: %w", candidate.Driver, err))
 	}
 	return nil, fmt.Errorf("no RSP or RTL-SDR found: %w", errors.Join(failures...))
@@ -111,12 +111,12 @@ func openSoapyCandidate(config Config) (result *soapyDevice, err error) {
 		}
 	}()
 	result.hardware = api.consume(api.hardwareKey(device))
-	config.trace("SoapySDR/%s: configurando sample rate %.0f", config.Driver, config.SampleRate)
+	config.trace("SoapySDR/%s: configuring sample rate %.0f", config.Driver, config.SampleRate)
 	if err = api.check(api.setSampleRate(device, soapyRX, 0, config.SampleRate), "set sample rate"); err != nil {
 		return nil, err
 	}
 	result.sampleRate = api.getSampleRate(device, soapyRX, 0)
-	config.trace("SoapySDR/%s: sintonizando %d Hz", config.Driver, config.FrequencyHz)
+	config.trace("SoapySDR/%s: tuning to %d Hz", config.Driver, config.FrequencyHz)
 	if err = api.check(api.setFrequency(device, soapyRX, 0, float64(config.FrequencyHz), 0), "set frequency"); err != nil {
 		return nil, err
 	}

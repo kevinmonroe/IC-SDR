@@ -172,7 +172,7 @@ func (p *AircraftPanel) openMap() {
 	}
 	if p.viewer != nil && p.viewer.Process != nil {
 		focusRTL433Viewer(p.viewer.Process.Pid)
-		p.feedback = "MAPA YA ABIERTO"
+		p.feedback = "MAP ALREADY OPEN"
 		return
 	}
 	exe, err := os.Executable()
@@ -190,7 +190,7 @@ func (p *AircraftPanel) openMap() {
 	p.viewerDone = make(chan struct{})
 	done := p.viewerDone
 	go func() { _ = cmd.Wait(); close(done) }()
-	p.feedback = "MAPA ABIERTO"
+	p.feedback = "MAP OPENED"
 }
 func (p *AircraftPanel) Close() {
 	p.enabled = false
@@ -210,12 +210,12 @@ func (p *AircraftPanel) DrawPanel() {
 	if status.Error != "" {
 		simpleui.DrawText(sondeClip(status.Error, 72), 880, toolY+38, 12, colors.red)
 	} else {
-		simpleui.DrawText("1090: ADS-B/Mode S mundial · 978 UAT: principalmente EE. UU.", 880, toolY+38, 12, colors.muted)
+		simpleui.DrawText("1090: worldwide ADS-B/Mode S · 978 UAT: mainly United States", 880, toolY+38, 12, colors.muted)
 	}
 	cols := []struct {
 		x    float32
 		name string
-	}{{40, "VUELO / ICAO"}, {260, "SOURCE"}, {375, "LATEST"}, {480, "ALT ft"}, {590, "VEL kt"}, {700, "HEADING"}, {810, "V/S fpm"}, {950, "LATITUDE"}, {1080, "LONGITUDE"}}
+	}{{40, "FLIGHT / ICAO"}, {260, "SOURCE"}, {375, "LATEST"}, {480, "ALT ft"}, {590, "SPEED kt"}, {700, "HEADING"}, {810, "V/S fpm"}, {950, "LATITUDE"}, {1080, "LONGITUDE"}}
 	for _, c := range cols {
 		simpleui.DrawText(c.name, c.x, toolY+78, 12, colors.muted)
 	}

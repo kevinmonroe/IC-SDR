@@ -8,7 +8,7 @@ import (
 
 func TestModeArgumentCoversInterfaceModes(t *testing.T) {
 	cases := map[string]string{
-		"AUTO · TODOS": "-fa", "DMR": "-fs", "P25 I": "-f1", "P25 II": "-f2",
+		"AUTO · ALL": "-fa", "DMR": "-fs", "P25 I": "-f1", "P25 II": "-f2",
 		"NXDN 48": "-fi", "NXDN 96": "-fn", "D-STAR": "-fd", "YSF": "-fy",
 		"dPMR": "-fm", "PROVOICE": "-fp", "M17": "-fz", "X2-TDMA": "-fx",
 	}
@@ -73,7 +73,7 @@ func TestStereoDigitalVoiceOutputKeepsFrameDuration(t *testing.T) {
 }
 
 func TestModeOutputChannelsMatchDSDNeoPresets(t *testing.T) {
-	for _, mode := range []string{"AUTO · TODOS", "DMR", "P25 II", "X2-TDMA"} {
+	for _, mode := range []string{"AUTO · ALL", "DMR", "P25 II", "X2-TDMA"} {
 		if got := modeOutputChannels(mode); got != 2 {
 			t.Errorf("%s channels = %d, want 2", mode, got)
 		}

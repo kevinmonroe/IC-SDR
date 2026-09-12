@@ -151,12 +151,12 @@ func (p *AudioPanel) apply() {
 
 func (p *AudioPanel) cycleProfile() {
 	switch p.profile {
-	case "SUAVE":
+	case "SOFT":
 		p.profile = "NORMAL"
 	case "NORMAL":
-		p.profile = "FUERTE"
+		p.profile = "STRONG"
 	default:
-		p.profile = "SUAVE"
+		p.profile = "SOFT"
 	}
 	p.apply()
 }

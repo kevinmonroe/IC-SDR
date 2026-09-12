@@ -260,7 +260,7 @@ func drawAircraftSymbol(p rl.Vector2, size, angle float32, c rl.Color) {
 }
 func (v *aircraftMap) details() {
 	x := float32(1015)
-	simpleui.DrawText("DETALLE DE AERONAVE", x, 88, 14, colors.orange)
+	simpleui.DrawText("AIRCRAFT DETAILS", x, 88, 14, colors.orange)
 	if v.selected < 0 || v.selected >= len(v.list) {
 		simpleui.DrawText("Click an aircraft", x, 125, 13, colors.muted)
 		return
@@ -276,7 +276,7 @@ func (v *aircraftMap) details() {
 	if a.Altitude != nil {
 		alt = fmt.Sprintf("%d ft", *a.Altitude)
 	}
-	lines := []struct{ l, v string }{{"VUELO", a.Callsign}, {"ICAO", a.ICAO}, {"SOURCE", a.Source}, {"LATITUDE", val(a.Latitude, "%.6f°")}, {"LONGITUDE", val(a.Longitude, "%.6f°")}, {"ALTITUDE", alt}, {"SPEED", val(a.Speed, "%.0f kt")}, {"HEADING", val(a.Track, "%.1f°")}, {"VERTICAL SPEED", val(a.VerticalRate, "%.0f ft/min")}, {"SQUAWK", a.Squawk}, {"CATEGORY", a.Category}, {"MESSAGES", fmt.Sprintf("%d", a.Messages)}, {"UPDATED", time.Since(a.LastSeen).Round(time.Second).String() + " ago"}}
+	lines := []struct{ l, v string }{{"FLIGHT", a.Callsign}, {"ICAO", a.ICAO}, {"SOURCE", a.Source}, {"LATITUDE", val(a.Latitude, "%.6f°")}, {"LONGITUDE", val(a.Longitude, "%.6f°")}, {"ALTITUDE", alt}, {"SPEED", val(a.Speed, "%.0f kt")}, {"HEADING", val(a.Track, "%.1f°")}, {"VERTICAL SPEED", val(a.VerticalRate, "%.0f ft/min")}, {"SQUAWK", a.Squawk}, {"CATEGORY", a.Category}, {"MESSAGES", fmt.Sprintf("%d", a.Messages)}, {"UPDATED", time.Since(a.LastSeen).Round(time.Second).String() + " ago"}}
 	for i, z := range lines {
 		y := float32(125 + i*42)
 		simpleui.DrawText(z.l, x, y, 9, colors.muted)

@@ -113,7 +113,7 @@ func (d *Decoder) start() {
 	session := d.session.Add(1)
 	d.running.Store(true)
 	d.mu.Lock()
-	d.state, d.detail, d.audioLevel = "BUSCANDO", "Conectando KISS local", -1
+	d.state, d.detail, d.audioLevel = "SEARCHING", "Connecting to local KISS server", -1
 	d.mu.Unlock()
 	go d.writer()
 	go d.readLines(stdout)
@@ -307,7 +307,7 @@ func (d *Decoder) add(packet Packet) {
 	if len(d.packets) > 500 {
 		d.packets = d.packets[:500]
 	}
-	d.state = "RECIBIENDO"
+	d.state = "RECEIVING"
 	d.detail = packet.Source + " > " + packet.Destination
 	d.mu.Unlock()
 	d.packetCount.Add(1)
@@ -345,7 +345,7 @@ func (d *Decoder) Clear() {
 	d.mu.Lock()
 	d.packets = nil
 	d.recentPackets = make(map[string]time.Time)
-	d.state = "BUSCANDO"
+	d.state = "SEARCHING"
 	d.detail = "Waiting for AX.25 frames"
 	d.mu.Unlock()
 	d.packetCount.Store(0)
