@@ -16,14 +16,14 @@ type FilterPreset struct {
 }
 
 var filterCatalog = map[string][]FilterPreset{
-	"SSB":      {{"FIL1", "ANCHO", 3000}, {"FIL2", "MEDIO", 2400}, {"FIL3", "ESTRECHO", 1800}, {"CUSTOM", "PERSONALIZADO", 2700}},
-	"AM":       {{"FIL1", "ANCHO", 10000}, {"FIL2", "MEDIO", 6000}, {"FIL3", "ESTRECHO", 4000}, {"CUSTOM", "PERSONALIZADO", 7500}},
-	"NFM":      {{"FIL1", "ANCHO", 15000}, {"FIL2", "MEDIO", 12500}, {"FIL3", "ESTRECHO", 8500}, {"CUSTOM", "PERSONALIZADO", 11500}},
-	"WFM":      {{"FIL1", "ANCHO", 220000}, {"FIL2", "MEDIO", 180000}, {"FIL3", "ESTRECHO", 150000}, {"CUSTOM", "PERSONALIZADO", 200000}},
-	"DMR BETA": {{"FIL1", "ANCHO", 15000}, {"FIL2", "DMR 12,5", 12500}, {"FIL3", "ESTRECHO", 10000}, {"CUSTOM", "PERSONALIZADO", 12500}},
-	"ADS-B":    {{"FIL1", "AMPLIO", 1800000}, {"FIL2", "COMPLETO", 2000000}, {"FIL3", "REDUCIDO", 1500000}, {"CUSTOM", "PERSONALIZADO", 2000000}},
-	"UAT":      {{"FIL1", "AMPLIO", 1800000}, {"FIL2", "COMPLETO", 2000000}, {"FIL3", "REDUCIDO", 1500000}, {"CUSTOM", "PERSONALIZADO", 2000000}},
-	"TETRA":    {{"FIL1", "TETRA 25", 25000}, {"FIL2", "MEDIO", 22000}, {"FIL3", "ESTRECHO", 18000}, {"CUSTOM", "PERSONALIZADO", 25000}},
+	"SSB":      {{"FIL1", "WIDE", 3000}, {"FIL2", "MEDIUM", 2400}, {"FIL3", "NARROW", 1800}, {"CUSTOM", "CUSTOM", 2700}},
+	"AM":       {{"FIL1", "WIDE", 10000}, {"FIL2", "MEDIUM", 6000}, {"FIL3", "NARROW", 4000}, {"CUSTOM", "CUSTOM", 7500}},
+	"NFM":      {{"FIL1", "WIDE", 15000}, {"FIL2", "MEDIUM", 12500}, {"FIL3", "NARROW", 8500}, {"CUSTOM", "CUSTOM", 11500}},
+	"WFM":      {{"FIL1", "WIDE", 220000}, {"FIL2", "MEDIUM", 180000}, {"FIL3", "NARROW", 150000}, {"CUSTOM", "CUSTOM", 200000}},
+	"DMR BETA": {{"FIL1", "WIDE", 15000}, {"FIL2", "DMR 12.5", 12500}, {"FIL3", "NARROW", 10000}, {"CUSTOM", "CUSTOM", 12500}},
+	"ADS-B":    {{"FIL1", "WIDE", 1800000}, {"FIL2", "FULL", 2000000}, {"FIL3", "REDUCED", 1500000}, {"CUSTOM", "CUSTOM", 2000000}},
+	"UAT":      {{"FIL1", "WIDE", 1800000}, {"FIL2", "FULL", 2000000}, {"FIL3", "REDUCED", 1500000}, {"CUSTOM", "CUSTOM", 2000000}},
+	"TETRA":    {{"FIL1", "TETRA 25", 25000}, {"FIL2", "MEDIUM", 22000}, {"FIL3", "NARROW", 18000}, {"CUSTOM", "CUSTOM", 25000}},
 }
 
 type FilterSelector struct {
@@ -45,8 +45,8 @@ func NewFilterSelector(onSelect func(FilterPreset)) *FilterSelector {
 	selector.custom = simpleui.NewSlider("filterCustom", 510, 500, 580, 34, 0, 1, .5)
 	selector.custom.SetStep(.001)
 	selector.custom.OnChange(func(value float32) { selector.setCustomNormalized(value) })
-	selector.cancel = simpleui.NewButton("filterCancel", 564, 590, 216, 50, "CANCELAR", 17)
-	selector.apply = simpleui.NewButton("filterApply", 820, 590, 216, 50, "APLICAR", 17)
+	selector.cancel = simpleui.NewButton("filterCancel", 564, 590, 216, 50, "CANCEL", 17)
+	selector.apply = simpleui.NewButton("filterApply", 820, 590, 216, 50, "APPLY", 17)
 	selector.cancel.OnClick(selector.cancelChanges)
 	selector.apply.OnClick(func() { selector.emit(); selector.open = false })
 	return selector
@@ -129,7 +129,7 @@ func (selector *FilterSelector) DrawOverlay() {
 	rl.DrawRectangleRounded(panel, .025, 8, colors.panel)
 	rl.DrawRectangleRoundedLinesEx(panel, .025, 8, 2, colors.blue)
 	rl.DrawRectangleRounded(rl.Rectangle{X: 410, Y: 150, Width: 10, Height: 530}, .5, 8, colors.blue)
-	drawCentered("FILTRO "+selector.mode, rl.Rectangle{X: 450, Y: 180, Width: 700, Height: 45}, 27, colors.text)
+	drawCentered("FILTER "+selector.mode, rl.Rectangle{X: 450, Y: 180, Width: 700, Height: 45}, 27, colors.text)
 	for index, preset := range filterCatalog[selector.mode] {
 		bounds := selector.presetBounds(index)
 		fill := colors.panelAlt
@@ -148,7 +148,7 @@ func (selector *FilterSelector) DrawOverlay() {
 		drawCentered(preset.Description, rl.Rectangle{X: bounds.X, Y: bounds.Y + 36, Width: bounds.Width, Height: 18}, 11, labelColor)
 		drawCentered(formatFilterBandwidth(preset.BandwidthHz), rl.Rectangle{X: bounds.X, Y: bounds.Y + 58, Width: bounds.Width, Height: 18}, 14, bandwidthColor)
 	}
-	drawCentered("CUSTOM permite ajustar y recordar un ancho para cada modo.", rl.Rectangle{X: 460, Y: 420, Width: 680, Height: 36}, 15, colors.text)
+	drawCentered("CUSTOM lets you set and remember a bandwidth for each mode.", rl.Rectangle{X: 460, Y: 420, Width: 680, Height: 36}, 15, colors.text)
 	if selector.selected[selector.mode] == 3 {
 		selector.custom.Draw()
 		minimum, maximum, _ := customFilterRange(selector.mode)

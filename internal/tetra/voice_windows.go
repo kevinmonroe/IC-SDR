@@ -14,26 +14,26 @@ type voiceDecoder struct {
 }
 
 func newVoiceDecoder(path string) *voiceDecoder {
-	v := &voiceDecoder{errText: "DLL AUSENTE", firstPass: 1}
+	v := &voiceDecoder{errText: "DLL MISSING", firstPass: 1}
 	if path == "" {
 		return v
 	}
 	dll := syscall.NewLazyDLL(path)
 	if err := dll.Load(); err != nil {
-		v.errText = fmt.Sprintf("NO CARGA (%v)", err)
+		v.errText = fmt.Sprintf("LOAD FAILED (%v)", err)
 		return v
 	}
 	v.init, v.cdec, v.sdec = dll.NewProc("tetra_decode_init"), dll.NewProc("tetra_cdec"), dll.NewProc("tetra_sdec")
 	if err := v.init.Find(); err != nil {
-		v.errText = "INIT NO DISPONIBLE"
+		v.errText = "INIT UNAVAILABLE"
 		return v
 	}
 	if err := v.cdec.Find(); err != nil {
-		v.errText = "CDEC NO DISPONIBLE"
+		v.errText = "CDEC UNAVAILABLE"
 		return v
 	}
 	if err := v.sdec.Find(); err != nil {
-		v.errText = "SDEC NO DISPONIBLE"
+		v.errText = "SDEC UNAVAILABLE"
 		return v
 	}
 	v.init.Call()

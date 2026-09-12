@@ -84,14 +84,14 @@ type Tracker struct {
 }
 
 var groups = []struct{ Name, Query string }{
-	{"Estaciones espaciales", "stations"}, {"Radioaficionados", "amateur"},
-	{"CubeSats", "cubesat"}, {"Meteorológicos", "weather"},
+	{"Space Stations", "stations"}, {"Amateur Radio", "amateur"},
+	{"CubeSats", "cubesat"}, {"WEATHER", "weather"},
 	{"GPS", "gps-ops"}, {"Galileo", "galileo"}, {"GLONASS", "glo-ops"}, {"BeiDou", "beidou"},
 	{"Iridium NEXT", "iridium-NEXT"}, {"Orbcomm", "orbcomm"}, {"Starlink", "starlink"},
 }
 
 func NewTracker(cachePath string) *Tracker {
-	t := &Tracker{cachePath: cachePath, station: Station{Name: "Madrid", Latitude: 40.4168, Longitude: -3.7038, AltitudeMeters: 657}, selected: 25544, source: "catálogo integrado"}
+	t := &Tracker{cachePath: cachePath, station: Station{Name: "Madrid", Latitude: 40.4168, Longitude: -3.7038, AltitudeMeters: 657}, selected: 25544, source: "built-in catalog"}
 	t.satellites = fallbackCatalog()
 	_ = t.loadCache()
 	return t
@@ -138,7 +138,7 @@ func (t *Tracker) Refresh(ctx context.Context) error {
 		}
 	}
 	if remoteCount == 0 {
-		return fmt.Errorf("no se pudo actualizar el catálogo orbital (%d grupos fallaron)", failures)
+		return fmt.Errorf("could not update the orbital catalog (%d groups failed)", failures)
 	}
 	list := make([]Satellite, 0, len(seen))
 	for _, sat := range seen {
@@ -176,7 +176,7 @@ func (t *Tracker) Snapshot(at time.Time) Snapshot {
 	for _, sat := range sats {
 		lat, lon, alt := position(sat.Elements, at)
 		az, el, rng := lookAngles(station, lat, lon, alt)
-		sig := Signal{Name: "Señal catalogada", Mode: "--"}
+		sig := Signal{Name: "Cataloged signal", Mode: "--"}
 		if len(sat.Signals) > 0 {
 			sig = sat.Signals[0]
 		}
@@ -313,7 +313,7 @@ func parseTLE(r interface{ Read([]byte) (int, error) }, group string) ([]Satelli
 		}
 	}
 	if len(out) == 0 {
-		return nil, errors.New("respuesta sin TLE")
+		return nil, errors.New("response contains no TLE data")
 	}
 	return out, nil
 }
@@ -333,7 +333,7 @@ func makeSatellite(name, l1, l2, group string) (Satellite, error) {
 	epoch := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC).Add(time.Duration((day - 1) * float64(24*time.Hour)))
 	f := strings.Fields(l2)
 	if len(f) < 8 {
-		return Satellite{}, errors.New("línea 2 inválida")
+		return Satellite{}, errors.New("invalid line 2")
 	}
 	inc, _ := strconv.ParseFloat(f[2], 64)
 	raan, _ := strconv.ParseFloat(f[3], 64)
@@ -425,23 +425,23 @@ func (t *Tracker) loadCache() error {
 	}
 	var c cachedCatalog
 	if json.Unmarshal(data, &c) != nil || len(c.Satellites) == 0 {
-		return errors.New("cache inválida")
+		return errors.New("invalid cache")
 	}
 	t.satellites = c.Satellites
-	t.source = "caché CelesTrak · " + c.Saved.Format("02 Jan 15:04")
+	t.source = "CelesTrak cache · " + c.Saved.Format("02 Jan 15:04")
 	return nil
 }
 
 func applyKnownSignals(s *Satellite) {
 	switch s.NORAD {
 	case 25544:
-		s.Signals = []Signal{{"Voz / SSTV", "FM", 145800000}, {"APRS", "AFSK", 145825000}}
+		s.Signals = []Signal{{"Voice / SSTV", "FM", 145800000}, {"APRS", "AFSK", 145825000}}
 	case 43700:
-		s.Signals = []Signal{{"Baliza PSK", "BPSK", 10489750000}, {"Transpondedor NB", "SSB/CW", 10489500000}, {"Transpondedor WB", "DVB-S2", 10491000000}}
+		s.Signals = []Signal{{"PSK Beacon", "BPSK", 10489750000}, {"NB Transponder", "SSB/CW", 10489500000}, {"WB Transponder", "DVB-S2", 10491000000}}
 	}
 }
 func fallbackCatalog() []Satellite {
-	raw := [][4]string{{"ISS (ZARYA)", "Estaciones espaciales", "1 25544U 98067A   25250.50000000  .00012000  00000-0  22000-3 0  9991", "2 25544  51.6340 150.0000 0004000 100.0000 260.0000 15.50000000123456"}, {"QO-100 (ES'HAIL 2)", "Radioaficionados", "1 43700U 18090A   25250.50000000  .00000010  00000-0  00000-0 0  9991", "2 43700   0.0150  85.0000 0001800 270.0000  90.0000  1.00270000 25000"}}
+	raw := [][4]string{{"ISS (ZARYA)", "Space Stations", "1 25544U 98067A   25250.50000000  .00012000  00000-0  22000-3 0  9991", "2 25544  51.6340 150.0000 0004000 100.0000 260.0000 15.50000000123456"}, {"QO-100 (ES'HAIL 2)", "Amateur Radio", "1 43700U 18090A   25250.50000000  .00000010  00000-0  00000-0 0  9991", "2 43700   0.0150  85.0000 0001800 270.0000  90.0000  1.00270000 25000"}}
 	out := make([]Satellite, 0, len(raw))
 	for _, v := range raw {
 		sat, _ := makeSatellite(v[0], v[2], v[3], v[1])

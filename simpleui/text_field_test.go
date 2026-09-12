@@ -7,8 +7,8 @@ import (
 
 func TestTextFieldUsesRunePositions(t *testing.T) {
 	field := NewTextField("name", 0, 0, 200, 40, "", 16)
-	field.SetText("España Ω")
-	if field.Text() != "España Ω" {
+	field.SetText("Unicode Ω")
+	if field.Text() != "Unicode Ω" {
 		t.Fatalf("got %q", field.Text())
 	}
 	if field.cursor != 8 {

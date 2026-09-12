@@ -19,10 +19,10 @@ func RunSatelliteMap(path string) {
 	simpleui.SetMode(1440, 840, simpleui.Fit)
 	simpleui.SetCanvasFilter(rl.FilterBilinear)
 	simpleui.SetTextScale(1.25)
-	simpleui.SetTitle("IC-SDR · Seguimiento de satélites")
+	simpleui.SetTitle("IC-SDR · Satellite Tracking")
 	simpleui.SetMinimumSize(960, 560)
-	v := &satelliteMap{path: path, enabled: map[int]bool{}, expanded: map[string]bool{"Estaciones espaciales": true, "Radioaficionados": true, "Meteorológicos": true}, selected: 25544}
-	v.search = simpleui.NewTextField("satelliteMapSearch", 28, 105, 296, 34, "BUSCAR NOMBRE, NORAD O GRUPO", 12)
+	v := &satelliteMap{path: path, enabled: map[int]bool{}, expanded: map[string]bool{"Space Stations": true, "Amateur Radio": true, "WEATHER": true}, selected: 25544}
+	v.search = simpleui.NewTextField("satelliteMapSearch", 28, 105, 296, 34, "SEARCH NAME, NORAD, OR GROUP", 12)
 	v.search.SetMaxLength(64)
 	v.search.OnChange(func(value string) { v.query = strings.ToLower(strings.TrimSpace(value)); v.scroll = 0 })
 	simpleui.Add(v.search)
@@ -118,14 +118,14 @@ func (v *satelliteMap) draw() {
 	v.drawDetails(details)
 }
 func (v *satelliteMap) drawHeader() {
-	simpleui.DrawTextStyled("SEGUIMIENTO DE SATÉLITES", 20, 19, 23, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("SATELLITE TRACKING", 20, 19, 23, simpleui.FontSemiBold, colors.cyan)
 	visible := 0
 	for _, s := range v.snapshot.Satellites {
 		if s.Visible {
 			visible++
 		}
 	}
-	simpleui.DrawText(fmt.Sprintf("%d objetos · %d visibles desde %s · %s", len(v.snapshot.Satellites), visible, v.snapshot.Station.Name, v.snapshot.Source), 380, 27, 13, colors.muted)
+	simpleui.DrawText(fmt.Sprintf("%d objects · %d visible from %s · %s", len(v.snapshot.Satellites), visible, v.snapshot.Station.Name, v.snapshot.Source), 380, 27, 13, colors.muted)
 }
 func (v *satelliteMap) grouped() ([]string, map[string][]satellite.State) {
 	m := map[string][]satellite.State{}
@@ -138,11 +138,11 @@ func (v *satelliteMap) grouped() ([]string, map[string][]satellite.State) {
 		}
 		m[s.Group] = append(m[s.Group], s)
 	}
-	order := []string{"Estaciones espaciales", "Radioaficionados", "CubeSats", "Meteorológicos", "GPS", "Galileo", "GLONASS", "BeiDou", "Iridium NEXT", "Orbcomm", "Starlink"}
+	order := []string{"Space Stations", "Amateur Radio", "CubeSats", "WEATHER", "GPS", "Galileo", "GLONASS", "BeiDou", "Iridium NEXT", "Orbcomm", "Starlink"}
 	return order, m
 }
 func (v *satelliteMap) drawList(b rl.Rectangle) {
-	simpleui.DrawTextStyled("CATÁLOGO", b.X+12, b.Y+10, 15, simpleui.FontSemiBold, colors.orange)
+	simpleui.DrawTextStyled("CATALOG", b.X+12, b.Y+10, 15, simpleui.FontSemiBold, colors.orange)
 	order, groups := v.grouped()
 	mouse := simpleui.MousePosition()
 	contentBounds := rl.Rectangle{X: b.X + 1, Y: b.Y + 78, Width: b.Width - 2, Height: b.Height - 79}
@@ -280,11 +280,11 @@ func (v *satelliteMap) drawMap(b rl.Rectangle) {
 	rl.DrawLine(int32(legendBar.X), int32(legendBar.Y), int32(legendBar.X+legendBar.Width), int32(legendBar.Y), colors.border)
 	legendY := legendBar.Y + 7
 	drawMapToggle(rl.Vector2{X: b.X + 7, Y: legendY + 5}, true)
-	simpleui.DrawText("mostrar/ocultar", b.X+19, legendY, 11, colors.muted)
+	simpleui.DrawText("show/hide", b.X+19, legendY, 11, colors.muted)
 	drawVisibilityIndicator(rl.Vector2{X: b.X + 151, Y: legendY + 5}, true)
-	simpleui.DrawText("visible desde la estación", b.X+163, legendY, 11, colors.muted)
+	simpleui.DrawText("visible from the station", b.X+163, legendY, 11, colors.muted)
 	drawVisibilityIndicator(rl.Vector2{X: b.X + 355, Y: legendY + 5}, false)
-	simpleui.DrawText("bajo el horizonte", b.X+367, legendY, 11, colors.muted)
+	simpleui.DrawText("below the horizon", b.X+367, legendY, 11, colors.muted)
 }
 
 func (v *satelliteMap) drawPassCard(mapBounds rl.Rectangle, target rl.Vector2, pass satellite.PassPrediction) {
@@ -308,19 +308,19 @@ func (v *satelliteMap) drawPassCard(mapBounds rl.Rectangle, target rl.Vector2, p
 	rl.DrawRectangleRounded(card, .06, 8, background)
 	rl.DrawRectangleRoundedLinesEx(card, .06, 8, 2, colors.orange)
 
-	simpleui.DrawTextStyled("PRÓXIMA PASADA", card.X+13, card.Y+10, 13, simpleui.FontSemiBold, colors.orange)
+	simpleui.DrawTextStyled("NEXT PASS", card.X+13, card.Y+10, 13, simpleui.FontSemiBold, colors.orange)
 	if pass.Continuous {
-		status := "VISIBLE CONTINUAMENTE"
+		status := "CONTINUOUSLY VISIBLE"
 		if !pass.InProgress {
-			status = "BAJO EL HORIZONTE"
+			status = "BELOW THE HORIZON"
 		}
 		simpleui.DrawTextStyled(status, card.X+13, card.Y+43, 14, simpleui.FontSemiBold, colors.text)
-		simpleui.DrawText("Sin AOS/LOS en las próximas 48 h", card.X+13, card.Y+72, 11, colors.muted)
+		simpleui.DrawText("No AOS/LOS in the next 48 hours", card.X+13, card.Y+72, 11, colors.muted)
 		return
 	}
 	if !pass.Found {
-		simpleui.DrawTextStyled("SIN PASADAS EN 48 H", card.X+13, card.Y+43, 14, simpleui.FontSemiBold, colors.text)
-		simpleui.DrawText("Según los elementos orbitales actuales", card.X+13, card.Y+72, 11, colors.muted)
+		simpleui.DrawTextStyled("NO PASSES IN 48 HOURS", card.X+13, card.Y+43, 14, simpleui.FontSemiBold, colors.text)
+		simpleui.DrawText("Based on current orbital elements", card.X+13, card.Y+72, 11, colors.muted)
 		return
 	}
 
@@ -329,8 +329,8 @@ func (v *satelliteMap) drawPassCard(mapBounds rl.Rectangle, target rl.Vector2, p
 	simpleui.DrawTextStyled(passDayLabel(now, tca)+" · "+tca.Format("15:04")+" "+localZoneLabel(tca), card.X+13, card.Y+32, 14, simpleui.FontSemiBold, colors.text)
 	simpleui.DrawText(passCountdown(v.snapshot.Updated, pass.TCA, pass.InProgress), card.X+13, card.Y+55, 11, colors.text)
 	rl.DrawLine(int32(card.X+12), int32(card.Y+75), int32(card.X+card.Width-12), int32(card.Y+75), withAlpha(colors.border, 180))
-	simpleui.DrawText(fmt.Sprintf("DISTANCIA MÍNIMA   %.0f km", pass.MinRangeKM), card.X+13, card.Y+82, 11, colors.text)
-	simpleui.DrawText(fmt.Sprintf("ELEVACIÓN MÁX.     %.1f°", pass.MaxElevation), card.X+13, card.Y+101, 11, colors.text)
+	simpleui.DrawText(fmt.Sprintf("MINIMUM DISTANCE   %.0f km", pass.MinRangeKM), card.X+13, card.Y+82, 11, colors.text)
+	simpleui.DrawText(fmt.Sprintf("MAX ELEVATION     %.1f°", pass.MaxElevation), card.X+13, card.Y+101, 11, colors.text)
 	simpleui.DrawText(fmt.Sprintf("AOS %s  ·  LOS %s", pass.AOS.Local().Format("15:04"), pass.LOS.Local().Format("15:04")), card.X+13, card.Y+119, 10, colors.muted)
 }
 
@@ -338,12 +338,12 @@ func passDayLabel(now, event time.Time) string {
 	y1, m1, d1 := now.Date()
 	y2, m2, d2 := event.Date()
 	if y1 == y2 && m1 == m2 && d1 == d2 {
-		return "HOY"
+		return "TODAY"
 	}
 	tomorrow := now.AddDate(0, 0, 1)
 	y3, m3, d3 := tomorrow.Date()
 	if y2 == y3 && m2 == m3 && d2 == d3 {
-		return "MAÑANA"
+		return "TOMORROW"
 	}
 	return event.Format("02/01")
 }
@@ -358,19 +358,19 @@ func localZoneLabel(at time.Time) string {
 
 func passCountdown(now, event time.Time, inProgress bool) string {
 	if inProgress {
-		return "PASADA EN CURSO"
+		return "PASS IN PROGRESS"
 	}
 	minutes := int(math.Round(event.Sub(now).Minutes()))
 	if minutes <= 0 {
-		return "AHORA"
+		return "NOW"
 	}
 	if minutes < 60 {
-		return fmt.Sprintf("EN %d min", minutes)
+		return fmt.Sprintf("IN %d min", minutes)
 	}
-	return fmt.Sprintf("EN %d h %02d min", minutes/60, minutes%60)
+	return fmt.Sprintf("IN %d h %02d min", minutes/60, minutes%60)
 }
 func (v *satelliteMap) drawDetails(b rl.Rectangle) {
-	simpleui.DrawTextStyled("SATÉLITE SELECCIONADO", b.X+14, b.Y+10, 14, simpleui.FontSemiBold, colors.orange)
+	simpleui.DrawTextStyled("SELECTED SATELLITE", b.X+14, b.Y+10, 14, simpleui.FontSemiBold, colors.orange)
 	var s *satellite.State
 	for i := range v.snapshot.Satellites {
 		if v.snapshot.Satellites[i].NORAD == v.selected {
@@ -379,13 +379,13 @@ func (v *satelliteMap) drawDetails(b rl.Rectangle) {
 		}
 	}
 	if s == nil {
-		simpleui.DrawText("Pulsa un satélite en el mapa o en el catálogo", b.X+14, b.Y+48, 13, colors.muted)
+		simpleui.DrawText("Click a satellite on the map or in the catalog", b.X+14, b.Y+48, 13, colors.muted)
 		return
 	}
-	eye := "BAJO EL HORIZONTE"
+	eye := "BELOW THE HORIZON"
 	c := colors.muted
 	if s.Visible {
-		eye = "VISIBLE DESDE " + v.snapshot.Station.Name
+		eye = "VISIBLE FROM " + v.snapshot.Station.Name
 		c = colors.green
 	}
 	separator := withAlpha(colors.border, 180)
@@ -398,21 +398,21 @@ func (v *satelliteMap) drawDetails(b rl.Rectangle) {
 	simpleui.DrawText(eye, b.X+14, b.Y+105, 12, c)
 
 	x := b.X + 304
-	simpleui.DrawText("POSICIÓN ORBITAL", x, b.Y+45, 11, colors.muted)
-	simpleui.DrawText(fmt.Sprintf("Latitud       %.4f°", s.Latitude), x, b.Y+72, 13, colors.text)
-	simpleui.DrawText(fmt.Sprintf("Longitud    %.4f°", s.Longitude), x, b.Y+98, 13, colors.text)
-	simpleui.DrawText(fmt.Sprintf("Altitud       %.0f km", s.AltitudeKM), x, b.Y+124, 13, colors.text)
+	simpleui.DrawText("ORBITAL POSITION", x, b.Y+45, 11, colors.muted)
+	simpleui.DrawText(fmt.Sprintf("LATITUDE       %.4f°", s.Latitude), x, b.Y+72, 13, colors.text)
+	simpleui.DrawText(fmt.Sprintf("LONGITUDE    %.4f°", s.Longitude), x, b.Y+98, 13, colors.text)
+	simpleui.DrawText(fmt.Sprintf("ALTITUDE       %.0f km", s.AltitudeKM), x, b.Y+124, 13, colors.text)
 
 	x = b.X + 566
-	simpleui.DrawText("DESDE "+v.snapshot.Station.Name, x, b.Y+45, 11, colors.muted)
-	simpleui.DrawText(fmt.Sprintf("Azimut        %.1f°", s.Azimuth), x, b.Y+72, 13, colors.text)
-	simpleui.DrawText(fmt.Sprintf("Elevación   %.1f°", s.Elevation), x, b.Y+98, 13, colors.text)
-	simpleui.DrawText(fmt.Sprintf("Distancia   %.0f km", s.RangeKM), x, b.Y+124, 13, colors.text)
+	simpleui.DrawText("FROM "+v.snapshot.Station.Name, x, b.Y+45, 11, colors.muted)
+	simpleui.DrawText(fmt.Sprintf("Azimuth      %.1f°", s.Azimuth), x, b.Y+72, 13, colors.text)
+	simpleui.DrawText(fmt.Sprintf("Elevation   %.1f°", s.Elevation), x, b.Y+98, 13, colors.text)
+	simpleui.DrawText(fmt.Sprintf("Distance     %.0f km", s.RangeKM), x, b.Y+124, 13, colors.text)
 
 	x = b.X + 808
-	simpleui.DrawText("RADIO / TELEMETRÍA", x, b.Y+45, 11, colors.muted)
+	simpleui.DrawText("RADIO / TELEMETRY", x, b.Y+45, 11, colors.muted)
 	simpleui.DrawText(sondeClip(s.Signal, 28), x, b.Y+72, 13, colors.text)
-	simpleui.DrawText("Modo          "+s.Mode, x, b.Y+98, 13, colors.text)
+	simpleui.DrawText("MODE          "+s.Mode, x, b.Y+98, 13, colors.text)
 	frequency := "Downlink    --"
 	if s.DownlinkHz > 0 {
 		frequency = fmt.Sprintf("Downlink    %.6f MHz", float64(s.DownlinkHz)/1e6)

@@ -50,11 +50,11 @@ type Decoder struct {
 func New(inputRate float64, executable string, onAudio func([]float32)) *Decoder {
 	d := &Decoder{executable: executable, onAudio: onAudio, front: newFrontend(inputRate, 0, 12_500), outputChannels: 1}
 	d.voiceRate.reset(8_000, 48_000)
-	d.status = Status{State: "DETENIDO", Detail: "Pulsa INICIAR para activar la detección", InputDBFS: -60}
+	d.status = Status{State: "STOPPED", Detail: "Press START to enable detection", InputDBFS: -60}
 	if info, err := os.Stat(executable); err == nil && !info.IsDir() {
 		d.status.Available = true
 	} else {
-		d.status.Detail = "Runtime DSD-neo no instalado"
+		d.status.Detail = "DSD-neo runtime not installed"
 	}
 	return d
 }
@@ -73,7 +73,7 @@ func (d *Decoder) Start(mode string) error {
 	}
 	if !d.status.Available {
 		d.mu.Unlock()
-		return fmt.Errorf("runtime DSD-neo no disponible: %s", d.executable)
+		return fmt.Errorf("DSD-neo runtime unavailable: %s", d.executable)
 	}
 	d.stop, d.done, d.pcm = make(chan struct{}), make(chan struct{}), make(chan []byte, 12)
 	d.voiceRate.reset(8_000, 48_000)
@@ -102,7 +102,7 @@ func (d *Decoder) Start(mode string) error {
 		return err
 	}
 	d.cmd, d.stdin = cmd, stdin
-	d.status.State, d.status.Detail, d.status.Running = "BUSCANDO", "Detección automática activa", true
+	d.status.State, d.status.Detail, d.status.Running = "SEARCHING", "Automatic detection active", true
 	d.status.StartedAt = time.Now()
 	d.mu.Unlock()
 	go d.runWriter()
@@ -146,7 +146,7 @@ func modeArgument(mode string) string {
 // available; the other scoped presets publish mono.
 func modeOutputChannels(mode string) int {
 	switch strings.ToUpper(strings.TrimSpace(mode)) {
-	case "AUTO · TODOS", "DMR", "P25 II", "X2-TDMA":
+	case "AUTO · ALL", "DMR", "P25 II", "X2-TDMA":
 		return 2
 	default:
 		return 1
@@ -166,7 +166,7 @@ func (d *Decoder) Stop() {
 		d.mu.Lock()
 		stop, stdin, cmd, running := d.stop, d.stdin, d.cmd, d.status.Running
 		d.status.Running, d.status.VoiceActive = false, false
-		d.status.State = "DETENIDO"
+		d.status.State = "STOPPED"
 		d.mu.Unlock()
 		if !running {
 			return
@@ -213,7 +213,7 @@ func (d *Decoder) Snapshot() Status {
 	if s.VoiceActive && !s.LastVoice.IsZero() && time.Since(s.LastVoice) > time.Second {
 		s.VoiceActive = false
 		if s.Running {
-			s.State = "BUSCANDO"
+			s.State = "SEARCHING"
 		}
 	}
 	return s
@@ -269,7 +269,7 @@ func (d *Decoder) runOutput(reader io.Reader) {
 			}
 			if voice {
 				d.mu.Lock()
-				d.status.VoiceActive, d.status.State, d.status.LastVoice = true, "DECODIFICANDO", time.Now()
+				d.status.VoiceActive, d.status.State, d.status.LastVoice = true, "DECODING", time.Now()
 				d.mu.Unlock()
 			}
 		}
@@ -370,7 +370,7 @@ func (d *Decoder) wait() {
 	err := d.cmd.Wait()
 	d.mu.Lock()
 	d.status.Running, d.status.VoiceActive = false, false
-	d.status.State = "DETENIDO"
+	d.status.State = "STOPPED"
 	if err != nil {
 		d.status.State, d.status.Detail = "ERROR", err.Error()
 	}

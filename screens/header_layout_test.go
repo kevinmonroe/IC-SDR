@@ -29,7 +29,7 @@ func TestSquelchAndHeaderSwitchLayout(t *testing.T) {
 			t.Fatalf("%s control is outside frequency panel: %+v", name, bounds)
 		}
 	}
-	for name, control := range map[string]*simpleui.Button{"MENU": screen.menuButton, "VIEW": screen.viewButton, "ESTILO": screen.themeButton} {
+	for name, control := range map[string]*simpleui.Button{"MENU": screen.menuButton, "VIEW": screen.viewButton, "THEME": screen.themeButton} {
 		bounds := control.Bounds()
 		if bounds.Y < frequencyPanelY || bounds.Y+bounds.Height > frequencyPanelY+frequencyPanelH ||
 			bounds.X < frequencyPanelX || bounds.X+bounds.Width > frequencyPanelX+frequencyPanelW {

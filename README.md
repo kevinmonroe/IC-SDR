@@ -1,129 +1,151 @@
 # IC-SDR
 
-**SDR multimodo para Windows, programado en Go para ofrecer la máxima eficiencia.**
+**A multimode SDR application for Windows, written in Go for maximum efficiency.**
 
-**Versión actual: [v0.5.0](https://github.com/LuislopezMartinez/IC-SDR/releases/tag/v0.5.0)**
+**Current version: [v0.5.0](https://github.com/LuislopezMartinez/IC-SDR/releases/tag/v0.5.0)**
 
-IC-SDR reúne recepción, demodulación, análisis de espectro y decodificación de señales digitales en una interfaz de escritorio diseñada para el uso diario.
+IC-SDR combines reception, demodulation, spectrum analysis, and digital-signal decoding in a desktop interface designed for everyday use.
+
+## About this fork
+
+This repository is an English-language fork of
+[LuislopezMartinez/IC-SDR](https://github.com/LuislopezMartinez/IC-SDR). It keeps
+the upstream v0.5.0 radio features while translating the interface, status and
+error messages, build output, documentation, tests, and bundled default
+configuration labels into English.
+
+The translation does not add decryption or change transmission permissions.
+IC-SDR is a receiver application; always follow the laws and band rules that
+apply where you operate it.
 
 > [!IMPORTANT]
-> IC-SDR está diseñado específicamente para **Windows**. El binario y todos los componentes necesarios para su distribución portable se encuentran en la carpeta `dist/IC-SDR-Go` después de generar el paquete.
+> IC-SDR is designed specifically for **Windows**. After building the portable package, the executable and all required components are placed in `dist/IC-SDR-Go`.
 
-![Interfaz principal de IC-SDR](docs/images/ic-sdr-principal.png)
+![IC-SDR main interface](docs/images/ic-sdr-principal.png)
 
-## Características
+## Features
 
-- Demodulación en **AM, NFM, WFM, LSB y USB**.
-- Soporte para modos digitales.
-- Espectro y cascada en tiempo real.
-- Banco de memorias organizado por grupos.
-- Grabador de audio con eliminación automática de espacios en blanco.
-- Escáner de segmentos de frecuencia con disparo instantáneo.
-- Detector de tonos y control de squelch.
-- Ecualizador de cinco bandas y controles de procesamiento de audio.
+- **AM, NFM, WFM, LSB, and USB** demodulation.
+- Digital-mode support.
+- Real-time spectrum and waterfall displays.
+- Group-based memory bank.
+- Audio recorder with automatic silence removal.
+- Frequency-segment scanner with instant triggering.
+- Tone detector and squelch control.
+- Five-band equalizer and audio-processing controls.
 
-## Decodificadores
+## Decoders
 
-IC-SDR integra herramientas para recibir y visualizar:
+IC-SDR integrates tools for receiving and displaying:
 
-- **AIS** — seguimiento de embarcaciones en los canales marítimos.
-- **ADS-B** — recepción de aeronaves en 1090 MHz y UAT 978 MHz.
-- **Radiosondas** — compatibilidad con RS41, DFM y M10/M20.
-- **APRS** — recepción y visualización de paquetes.
-- **RTL_433** — decodificación de sensores y dispositivos ISM, con exportación CSV.
-- **DMR** — recepción de radio digital.
-- **SSTV** — televisión de barrido lento.
-- **TETRA** — recepción y análisis de señales TETRA.
-- **Digital Auto** — detección y decodificación de DMR, P25 I/II, NXDN,
-  D-STAR, YSF, dPMR, ProVoice, M17 y X2-TDMA mediante DSD-neo.
+- **AIS** — vessel tracking on marine channels.
+- **ADS-B** — aircraft reception on 1090 MHz and UAT 978 MHz.
+- **Radiosondes** — RS41, DFM, and M10/M20 support.
+- **APRS** — packet reception and display.
+- **RTL_433** — ISM sensor and device decoding with CSV export.
+- **DMR** — digital-radio reception.
+- **SSTV** — slow-scan television.
+- **TETRA** — TETRA signal reception and analysis.
+- **Digital Auto** — DMR, P25 I/II, NXDN, D-STAR, YSF, dPMR,
+  ProVoice, M17, and X2-TDMA detection and decoding through DSD-neo.
 
-![Decodificación RTL_433 en IC-SDR](docs/images/ic-sdr-rtl433.png)
+![RTL_433 decoding in IC-SDR](docs/images/ic-sdr-rtl433.png)
 
-## Novedades de v0.5.0
+## What’s new in v0.5.0
 
-- Visor TETRA/SDS ampliado con SSI de origen y destino, slot, cifrado,
-  protocolo, tipo de datos y diagnóstico del contenido recibido.
-- Conservación y visualización hexadecimal de mensajes SDS todavía no
-  interpretados, facilitando el análisis de protocolos adicionales.
-- Cabecera reorganizada con acceso directo a menú, vista, estilo y controles
-  para aumentar o reducir el paso de sintonía.
-- Área inferior aprovechada por completo y vistas simplificadas para mejorar
-  la legibilidad de los módulos y decodificadores.
-- El filtro NFM personalizado admite ahora anchos desde 500 Hz.
-- Corregido el desplazamiento del catálogo de satélites para poder alcanzar
-  todos los elementos y grupos de la lista.
-- Correcciones en la restauración de vistas, memorias y pasos de sintonía.
-- Nuevas pruebas para SDS/TETRA, disposición de la cabecera, sintonía, filtros
-  y desplazamiento del mapa de satélites.
+- Expanded TETRA/SDS viewer with source and destination SSI, slot, encryption,
+  protocol, data type, and received-content diagnostics.
+- Retains and displays uninterpreted SDS messages in hexadecimal to help analyze
+  additional protocols.
+- Reorganized header with direct menu, view, style, and tuning-step controls.
+- Better use of the lower workspace and simplified module and decoder views.
+- Custom NFM filtering now supports bandwidths from 500 Hz.
+- Fixed satellite-catalog scrolling so every item and group can be reached.
+- Fixed restoration of views, memories, and tuning steps.
+- Added tests for SDS/TETRA, header layout, tuning, filters, and satellite-map scrolling.
 
-## Novedades de v0.4.0
+## What’s new in v0.4.0
 
-- Nuevo decodificador **Digital Auto** con selección simultánea de protocolos,
-  detección de llamadas y reproducción de voz digital.
-- Panel dedicado con protocolo, slot, origen, destino, estado de cifrado,
-  nivel de entrada, SNR, BER y datos específicos de la red.
-- Predicción de próximas pasadas de satélites con AOS, máxima aproximación,
-  LOS, elevación máxima y distancia mínima.
-- Reinicio seguro de decodificadores, audio y escáner al cambiar de banda o
-  modo, evitando audio residual y estados bloqueados.
-- Correcciones en la reproducción al alternar entre audio analógico y digital.
-- Corrección de la selección visual de dígitos en el control de frecuencia.
-- Mejoras de contraste y legibilidad en el medidor de señal y el escáner.
-- Validación del runtime DSD-neo 2.9.0 al construir la distribución portable.
-- Nuevas pruebas para voz digital, predicción orbital, receptor y reproducción.
+- Added the **Digital Auto** decoder with simultaneous protocol selection,
+  call detection, and digital-voice playback.
+- Added a dedicated panel showing protocol, slot, source, destination,
+  encryption state, input level, SNR, BER, and network-specific data.
+- Added satellite-pass prediction with AOS, closest approach, LOS,
+  maximum elevation, and minimum distance.
+- Safely resets decoders, audio, and the scanner when changing band or mode,
+  preventing stale audio and locked states.
+- Fixed playback when switching between analog and digital audio.
+- Fixed visual digit selection in the frequency control.
+- Improved signal-meter and scanner contrast and readability.
+- Validates the DSD-neo 2.9.0 runtime when building the portable package.
+- Added tests for digital voice, orbital prediction, the receiver, and playback.
 
-## Novedades de v0.3.1
+## What’s new in v0.3.1
 
-- Nuevo módulo de seguimiento de satélites con catálogo TLE actualizado desde CelesTrak.
-- Mapa mundial con posición, órbita, visibilidad y detalles de los satélites.
-- Búsqueda, agrupación y sintonización de las frecuencias asociadas a cada satélite.
-- Grabación de audio en **MP3 o WAV**, seleccionable desde la interfaz.
-- Grabador renovado con medidor de nivel, historial, reproducción y eliminación de archivos.
-- Mejoras en la omisión automática de silencios mediante squelch.
-- Ajustes visuales y de usabilidad en memorias, escáner y menú de herramientas.
-- Nuevas pruebas para satélites, grabación y marcadores de memoria.
+- Added satellite tracking with a TLE catalog updated from CelesTrak.
+- Added a world map with satellite position, orbit, visibility, and details.
+- Added searching, grouping, and tuning for satellite-associated frequencies.
+- Added selectable **MP3 or WAV** audio recording.
+- Updated the recorder with a level meter, history, playback, and file deletion.
+- Improved automatic silence skipping through squelch.
+- Improved usability in memories, the scanner, and the tools menu.
+- Added tests for satellites, recording, and memory markers.
 
-## Novedades de v0.2.1
+## What’s new in v0.2.1
 
-- Nuevos temas visuales y mejoras de contraste y legibilidad en toda la interfaz.
-- Gestión de memorias ampliada con descripciones, prioridades, colores y edición de grupos.
-- Nuevos presets para bandas aeronáuticas, marítimas e ISS/ARISS.
-- Mejoras en el modo SSTV automático y selección de modos candidatos.
-- Rediseño y ajustes de usabilidad en los paneles de audio, escáner, grabador y utilidades.
-- Nuevas pruebas para temas, contraste, memorias y SSTV.
+- Added visual themes and improved interface contrast and readability.
+- Expanded memory management with descriptions, priorities, colors, and group editing.
+- Added presets for aviation, marine, and ISS/ARISS bands.
+- Improved automatic SSTV operation and candidate-mode selection.
+- Redesigned the audio, scanner, recorder, and utilities panels.
+- Added tests for themes, contrast, memories, and SSTV.
 
-## Windows y distribución portable
+## Windows portable distribution
 
-IC-SDR está pensado para ejecutarse en Windows. La carpeta local `dist/IC-SDR-Go` contiene el binario distribuible `IC-SDR-Go.exe`, sus runtimes y las herramientas auxiliares necesarias. El directorio `DATA` debe permanecer junto al ejecutable.
+IC-SDR is intended for Windows. The local `dist/IC-SDR-Go` folder contains the distributable `IC-SDR-Go.exe`, its runtimes, and the required supporting tools. Keep the `DATA` directory beside the executable.
 
-La carpeta `dist/` se genera localmente y no forma parte del código fuente versionado. Para reconstruirla se utiliza `build-release.ps1`.
+The `dist/` folder is generated locally and is not part of the versioned source. Use `build-release.ps1` to rebuild it.
 
-## Requisitos
+## Requirements
 
 - Windows.
-- Go 1.27 o posterior para compilar desde el código fuente.
-- Un receptor compatible con RTL-SDR o SoapySDR/SDRplay.
+- Go 1.27 or later when compiling from source.
+- An RTL-SDR or SoapySDR/SDRplay-compatible receiver.
 
-## Compilación
+## Build
 
-Desde la raíz del repositorio:
+From the repository root:
 
 ```powershell
 go build .
 ```
 
-Para generar la distribución portable de Windows:
+To create the portable Windows distribution:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\build-release.ps1
 ```
 
-La distribución se crea en `dist/IC-SDR-Go`. Consulta [DISTRIBUTION.md](DISTRIBUTION.md) para obtener más información sobre el paquete portable y los directorios de datos.
+The portable build also requires the upstream runtime assets under
+`ORIGEN/IC_SDR`. That directory is intentionally not versioned because it
+contains bundled executables, DLLs, and other runtime files. The script stops
+with a clear error if an asset is missing or if the required DSD-neo runtime is
+not version 2.9.0.
 
-## Datos y configuración
+The distribution is created in `dist/IC-SDR-Go`. See
+[DISTRIBUTION.md](DISTRIBUTION.md) for details about the portable package and
+data directories.
 
-Los ajustes, memorias, grabaciones, capturas, exportaciones y registros se almacenan bajo `DATA`. Los datos generados durante el uso no se incluyen en el repositorio.
+## Data and configuration
 
-## Estado del proyecto
+Settings, memories, recordings, captures, exports, and logs are stored under
+`DATA`. The repository includes English-labeled default files in `DATA/config`;
+cache files, logs, recordings, exports, and captures are ignored by Git.
 
-IC-SDR se encuentra en desarrollo activo. Las funciones disponibles pueden variar según el receptor, los controladores y las herramientas de decodificación instaladas.
+The bundled memories are upstream Spain/Barcelona examples. Treat them as
+starting points, verify frequencies against current official sources, and
+replace them with a local receive-only list as needed.
+
+## Project status
+
+IC-SDR is under active development. Available features may vary with the receiver, drivers, and installed decoding tools.

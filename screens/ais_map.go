@@ -20,7 +20,7 @@ func RunAISMap(path string) {
 	simpleui.SetMode(1360, 800, simpleui.Fit)
 	simpleui.SetCanvasFilter(rl.FilterBilinear)
 	simpleui.SetTextScale(1.25)
-	simpleui.SetTitle("IC-SDR · Mapa AIS")
+	simpleui.SetTitle("IC-SDR · AIS Map")
 	simpleui.SetMinimumSize(900, 540)
 	v := &aisMap{path: path, centerLat: 40.2, centerLon: -3.7, lonSpan: 14, selected: -1, tracks: make(map[uint32][]geoPoint)}
 	center := simpleui.NewButton("aisCenterFleet", 1040, 18, 145, 42, "CENTRAR FLOTA", 13)
@@ -295,24 +295,24 @@ func (v *aisMap) draw() {
 		simpleui.DrawText(sondeClip(name, 19), p.X+12, p.Y-7, 10, colors.text)
 	}
 	v.drawScale(b)
-	simpleui.DrawText("MAPA AIS EN VIVO", 24, 20, 24, colors.cyan)
-	simpleui.DrawText(fmt.Sprintf("%d barcos con señal · arrastra para mover · rueda para zoom", len(v.vessels)), 310, 29, 13, colors.muted)
+	simpleui.DrawText("LIVE AIS MAP", 24, 20, 24, colors.cyan)
+	simpleui.DrawText(fmt.Sprintf("%d vessels with signals · drag to pan · wheel to zoom", len(v.vessels)), 310, 29, 13, colors.muted)
 	v.drawDetails()
-	simpleui.DrawText("Natural Earth · cartografía integrada · sin conexión a Internet", 1015, 742, 9, colors.muted)
+	simpleui.DrawText("Natural Earth · built-in maps · no Internet connection", 1015, 742, 9, colors.muted)
 }
 
 func (v *aisMap) drawDetails() {
 	x := float32(1015)
-	simpleui.DrawText("DETALLE DEL BARCO", x, 88, 14, colors.orange)
+	simpleui.DrawText("VESSEL DETAILS", x, 88, 14, colors.orange)
 	if v.selected < 0 || v.selected >= len(v.vessels) {
-		simpleui.DrawText("Pulsa un barco en el mapa", x, 125, 13, colors.muted)
-		simpleui.DrawText("para consultar sus datos.", x, 148, 13, colors.muted)
+		simpleui.DrawText("Click a vessel on the map", x, 125, 13, colors.muted)
+		simpleui.DrawText("to view its details.", x, 148, 13, colors.muted)
 		return
 	}
 	s := v.vessels[v.selected]
 	name := s.Name
 	if name == "" {
-		name = "SIN NOMBRE"
+		name = "UNNAMED"
 	}
 	value := func(p *float64, format string) string {
 		if p == nil {
@@ -321,7 +321,7 @@ func (v *aisMap) drawDetails() {
 		return fmt.Sprintf(format, *p)
 	}
 	age := time.Since(s.LastSeen).Round(time.Second)
-	lines := []struct{ label, val string }{{"NOMBRE", name}, {"MMSI", fmt.Sprintf("%09d", s.MMSI)}, {"CALLSIGN", s.Callsign}, {"TIPO", s.ShipTypeText}, {"ESTADO", s.StatusText}, {"LATITUD", value(s.Latitude, "%.6f°")}, {"LONGITUD", value(s.Longitude, "%.6f°")}, {"VELOCIDAD", value(s.Speed, "%.1f kn")}, {"RUMBO COG", value(s.Course, "%.1f°")}, {"PROA HDG", value(s.Heading, "%.0f°")}, {"DESTINO", s.Destination}, {"MENSAJES", fmt.Sprintf("%d", s.Messages)}, {"ACTUALIZADO", age.String() + " atrás"}}
+	lines := []struct{ label, val string }{{"NAME", name}, {"MMSI", fmt.Sprintf("%09d", s.MMSI)}, {"CALLSIGN", s.Callsign}, {"TYPE", s.ShipTypeText}, {"STATUS", s.StatusText}, {"LATITUDE", value(s.Latitude, "%.6f°")}, {"LONGITUDE", value(s.Longitude, "%.6f°")}, {"SPEED", value(s.Speed, "%.1f kn")}, {"COG HEADING", value(s.Course, "%.1f°")}, {"BOW HEADING", value(s.Heading, "%.0f°")}, {"DESTINATION", s.Destination}, {"MESSAGES", fmt.Sprintf("%d", s.Messages)}, {"UPDATED", age.String() + " ago"}}
 	for i, line := range lines {
 		y := float32(125 + i*42)
 		simpleui.DrawText(line.label, x, y, 9, colors.muted)
