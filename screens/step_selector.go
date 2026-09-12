@@ -25,7 +25,7 @@ func NewStepSelector(selected int64, onSelect func(int64)) *StepSelector {
 	return &StepSelector{
 		BaseElement: simpleui.NewBaseElement("stepSelectorOverlay", 0, 0, designWidth, designHeight),
 		selected:    selected, pressed: -1, onSelect: onSelect,
-		close: simpleui.NewButton("stepSelectorClose", 650, 445, 300, 50, "CERRAR", 17),
+		close: simpleui.NewButton("stepSelectorClose", 650, 445, 300, 50, "CLOSE", 17),
 	}
 }
 
@@ -75,7 +75,7 @@ func (selector *StepSelector) DrawOverlay() {
 	rl.DrawRectangleRounded(panel, .03, 8, colors.panel)
 	rl.DrawRectangleRoundedLinesEx(panel, .03, 8, 2, colors.blue)
 	rl.DrawRectangleRounded(rl.Rectangle{X: 430, Y: 170, Width: 10, Height: 360}, .5, 8, colors.blue)
-	drawCentered("SELECCIONAR STEP", rl.Rectangle{X: 470, Y: 195, Width: 660, Height: 44}, 25, colors.text)
+	drawCentered("SELECT STEP", rl.Rectangle{X: 470, Y: 195, Width: 660, Height: 44}, 25, colors.text)
 	for index, step := range tuningStepsHz {
 		bounds := selector.stepBounds(index)
 		fill := colors.panelAlt

@@ -85,13 +85,13 @@ type Tracker struct {
 
 var groups = []struct{ Name, Query string }{
 	{"Estaciones espaciales", "stations"}, {"Radioaficionados", "amateur"},
-	{"CubeSats", "cubesat"}, {"Meteorológicos", "weather"},
+	{"CubeSats", "cubesat"}, {"WEATHER", "weather"},
 	{"GPS", "gps-ops"}, {"Galileo", "galileo"}, {"GLONASS", "glo-ops"}, {"BeiDou", "beidou"},
 	{"Iridium NEXT", "iridium-NEXT"}, {"Orbcomm", "orbcomm"}, {"Starlink", "starlink"},
 }
 
 func NewTracker(cachePath string) *Tracker {
-	t := &Tracker{cachePath: cachePath, station: Station{Name: "Madrid", Latitude: 40.4168, Longitude: -3.7038, AltitudeMeters: 657}, selected: 25544, source: "catálogo integrado"}
+	t := &Tracker{cachePath: cachePath, station: Station{Name: "Madrid", Latitude: 40.4168, Longitude: -3.7038, AltitudeMeters: 657}, selected: 25544, source: "built-in catalog"}
 	t.satellites = fallbackCatalog()
 	_ = t.loadCache()
 	return t
@@ -138,7 +138,7 @@ func (t *Tracker) Refresh(ctx context.Context) error {
 		}
 	}
 	if remoteCount == 0 {
-		return fmt.Errorf("no se pudo actualizar el catálogo orbital (%d grupos fallaron)", failures)
+		return fmt.Errorf("could not update the orbital catalog (%d groups failed)", failures)
 	}
 	list := make([]Satellite, 0, len(seen))
 	for _, sat := range seen {
@@ -176,7 +176,7 @@ func (t *Tracker) Snapshot(at time.Time) Snapshot {
 	for _, sat := range sats {
 		lat, lon, alt := position(sat.Elements, at)
 		az, el, rng := lookAngles(station, lat, lon, alt)
-		sig := Signal{Name: "Señal catalogada", Mode: "--"}
+		sig := Signal{Name: "Cataloged signal", Mode: "--"}
 		if len(sat.Signals) > 0 {
 			sig = sat.Signals[0]
 		}
@@ -313,7 +313,7 @@ func parseTLE(r interface{ Read([]byte) (int, error) }, group string) ([]Satelli
 		}
 	}
 	if len(out) == 0 {
-		return nil, errors.New("respuesta sin TLE")
+		return nil, errors.New("response contains no TLE data")
 	}
 	return out, nil
 }
@@ -333,7 +333,7 @@ func makeSatellite(name, l1, l2, group string) (Satellite, error) {
 	epoch := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC).Add(time.Duration((day - 1) * float64(24*time.Hour)))
 	f := strings.Fields(l2)
 	if len(f) < 8 {
-		return Satellite{}, errors.New("línea 2 inválida")
+		return Satellite{}, errors.New("invalid line 2")
 	}
 	inc, _ := strconv.ParseFloat(f[2], 64)
 	raan, _ := strconv.ParseFloat(f[3], 64)
@@ -425,10 +425,10 @@ func (t *Tracker) loadCache() error {
 	}
 	var c cachedCatalog
 	if json.Unmarshal(data, &c) != nil || len(c.Satellites) == 0 {
-		return errors.New("cache inválida")
+		return errors.New("invalid cache")
 	}
 	t.satellites = c.Satellites
-	t.source = "caché CelesTrak · " + c.Saved.Format("02 Jan 15:04")
+	t.source = "CelesTrak cache · " + c.Saved.Format("02 Jan 15:04")
 	return nil
 }
 

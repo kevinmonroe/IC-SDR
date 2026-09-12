@@ -198,7 +198,7 @@ func New(inputRate float64, codecPath string, onAudio func([]float32)) *Decoder 
 	if inputRate <= 0 {
 		inputRate = 2_048_000
 	}
-	d := &Decoder{rate: inputRate, state: "DETENIDO", users: make(map[uint32]User), groups: make(map[uint32]Group), calls: make(map[uint16]Call), neighbours: make(map[uint8]Neighbour), positions: make(map[uint32]Position), fragments: make(map[uint32]llcFragment), onAudio: onAudio}
+	d := &Decoder{rate: inputRate, state: "STOPPED", users: make(map[uint32]User), groups: make(map[uint32]Group), calls: make(map[uint16]Call), neighbours: make(map[uint8]Neighbour), positions: make(map[uint32]Position), fragments: make(map[uint32]llcFragment), onAudio: onAudio}
 	for slot := range d.voice {
 		path := codecPath
 		if slot > 0 && codecPath != "" {
@@ -217,7 +217,7 @@ func New(inputRate float64, codecPath string, onAudio func([]float32)) *Decoder 
 	d.activeCallID = 0
 	d.audioFrames, d.lastAudio = 0, time.Time{}
 	d.channelErrors, d.channelBits, d.channelFrames, d.channelBad = 0, 0, 0, 0
-	d.lastAudioDecision = "ESPERANDO TRÁFICO"
+	d.lastAudioDecision = "WAITING FOR TRAFFIC"
 	d.audioRejectedEncrypted, d.audioRejectedUnselected = 0, 0
 	d.audioRejectedInactive, d.audioRejectedDamaged = 0, 0
 	d.clearAudioOnly = true
@@ -246,7 +246,7 @@ func (d *Decoder) Configure(enabled bool) {
 	if !enabled {
 		stop, done := d.stop, d.done
 		d.running = false
-		d.state = "DETENIDO"
+		d.state = "STOPPED"
 		d.mu.Unlock()
 		close(stop)
 		<-done
@@ -256,7 +256,7 @@ func (d *Decoder) Configure(enabled bool) {
 	d.stop = make(chan struct{})
 	d.done = make(chan struct{})
 	d.running = true
-	d.state = "BUSCANDO SINCRONÍA"
+	d.state = "SEARCHING FOR SYNC"
 	d.totalBits, d.lastSyncBit = 0, 0
 	queue, stop, done := d.queue, d.stop, d.done
 	d.mu.Unlock()
@@ -356,7 +356,7 @@ func (d *Decoder) Snapshot() Status {
 	if time.Since(d.activeAudioSeen) > 5*time.Second {
 		activeAudioSlot = 0
 	}
-	codecReady, codecError := false, "CÓDEC NO CONFIGURADO"
+	codecReady, codecError := false, "CODEC NO CONFIGURADO"
 	codecReady = true
 	for _, voice := range d.voice {
 		if voice == nil || !voice.ready {
@@ -591,9 +591,9 @@ func (d *Decoder) run(queue <-chan []float32, stop <-chan struct{}, done chan<- 
 						}
 						d.lastSync = time.Now()
 						if isNDB2 {
-							d.state = "RÁFAGA NDB2 TETRA"
+							d.state = "TETRA NDB2 BURST"
 						} else {
-							d.state = "RÁFAGA NDB1 TETRA"
+							d.state = "TETRA NDB1 BURST"
 						}
 						d.mu.Unlock()
 						if detectedSlot >= 0 && d.totalBits >= 266 {
@@ -716,7 +716,7 @@ func (d *Decoder) processNormalBurst(burst []byte, slot int, ndb2 bool) {
 				d.lastAudioDecision = fmt.Sprintf("TS%d NDB2 NO SELECCIONADO", slot+1)
 			} else if d.clearAudioOnly && d.slotEncrypted[slot] != 0 {
 				d.audioRejectedEncrypted++
-				d.lastAudioDecision = fmt.Sprintf("TS%d NDB2 CIFRADO O DESCONOCIDO", slot+1)
+				d.lastAudioDecision = fmt.Sprintf("TS%d NDB2 ENCRYPTED O DESCONOCIDO", slot+1)
 			} else if half := descrambleBlock(coded[216:], si); half != nil {
 				voiceBits := make([]byte, 432)
 				copy(voiceBits[216:], half)
@@ -777,15 +777,15 @@ func (d *Decoder) processMACPayloadLocked(payload []byte, slot int) {
 
 func (d *Decoder) processVoiceLocked(coded []byte, si SystemInfo, slot int) {
 	if d.onAudio == nil || slot < 0 || slot > 3 {
-		d.lastAudioDecision = "SALIDA DE AUDIO NO DISPONIBLE"
+		d.lastAudioDecision = "SALIDA DE AUDIO UNAVAILABLE"
 		return
 	}
 	if d.clearAudioOnly && d.slotEncrypted[slot] != 0 {
 		d.audioRejectedEncrypted++
 		if d.slotEncrypted[slot] < 0 {
-			d.lastAudioDecision = fmt.Sprintf("TS%d CIFRADO DESCONOCIDO", slot+1)
+			d.lastAudioDecision = fmt.Sprintf("TS%d ENCRYPTED DESCONOCIDO", slot+1)
 		} else {
-			d.lastAudioDecision = fmt.Sprintf("TS%d CIFRADO", slot+1)
+			d.lastAudioDecision = fmt.Sprintf("TS%d ENCRYPTED", slot+1)
 		}
 		return
 	}
@@ -797,13 +797,13 @@ func (d *Decoder) processVoiceLocked(coded []byte, si SystemInfo, slot int) {
 	voice := d.voice[slot]
 	if voice == nil || !voice.ready {
 		d.audioRejectedInactive++
-		d.lastAudioDecision = "CÓDEC DE VOZ NO DISPONIBLE"
+		d.lastAudioDecision = "CODEC DE VOZ UNAVAILABLE"
 		return
 	}
 	type4 := descrambleFullSlot(coded, si)
 	if type4 == nil {
 		d.audioRejectedDamaged++
-		d.lastAudioDecision = "TRAMA SIN SCRAMBLER VÁLIDO"
+		d.lastAudioDecision = "FRAME WITHOUT VALID SCRAMBLER"
 		return
 	}
 	d.processVoiceBitsLocked(type4, slot, false)
@@ -819,7 +819,7 @@ func (d *Decoder) processVoiceBitsLocked(type4 []byte, slot int, stolen bool) {
 	}
 	d.audioFrames++
 	d.lastAudio = time.Now()
-	d.lastAudioDecision = fmt.Sprintf("REPRODUCIENDO TS%d", slot+1)
+	d.lastAudioDecision = fmt.Sprintf("PLAYING TS%d", slot+1)
 	d.onAudio(pcm)
 }
 
@@ -914,7 +914,7 @@ func (d *Decoder) processMACResourceLocked(payload []byte, slot int) {
 		if cmce.Code == 0 || cmce.Code == 1 || cmce.Code == 2 || cmce.Code == 7 || cmce.Code == 11 {
 			g := d.groups[address.SSI]
 			g.ID = address.SSI
-			g.Name = "DESTINO CMCE"
+			g.Name = "DESTINATION CMCE"
 			g.LastSeen = now
 			g.Calls++
 			g.LastEvent = cmce.Kind

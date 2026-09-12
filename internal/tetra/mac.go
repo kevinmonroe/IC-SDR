@@ -183,7 +183,7 @@ func parseMACResource(bits []byte) (resourceAddress, bool) {
 
 func parseMACResourceDetailed(bits []byte) (resourceAddress, string, bool) {
 	if len(bits) < 40 || bitsToUint(bits, 0, 2) != 0 {
-		return resourceAddress{}, "TIPO", false
+		return resourceAddress{}, "TYPE", false
 	}
 	encryption := bitsToUint(bits, 4, 2)
 	lengthField := bitsToUint(bits, 7, 6)

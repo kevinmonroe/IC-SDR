@@ -38,7 +38,7 @@ func NewAPRSPanel(screen *MainScreen) *APRSPanel {
 		id, label string
 		w         float32
 		color     rl.Color
-	}{{"PAQUETES", "PAQUETES", 120, colors.blue}, {"ESTACIONES", "ESTACIONES", 130, colors.panelAlt}, {"MENSAJES", "MENSAJES", 120, colors.panelAlt}, {"RADAR", "RADAR", 100, colors.panelAlt}, {"RAW", "RAW", 85, colors.panelAlt}}
+	}{{"PAQUETES", "PAQUETES", 120, colors.blue}, {"ESTACIONES", "ESTACIONES", 130, colors.panelAlt}, {"MESSAGES", "MESSAGES", 120, colors.panelAlt}, {"RADAR", "RADAR", 100, colors.panelAlt}, {"RAW", "RAW", 85, colors.panelAlt}}
 	x := float32(40)
 	for _, item := range items {
 		b := simpleui.NewButton("aprs"+item.id, x, 660, item.w, 40, item.label, uiControlFontSize)
@@ -59,20 +59,20 @@ func NewAPRSPanel(screen *MainScreen) *APRSPanel {
 	europe := simpleui.NewButton("aprsEurope", 650, 660, 185, 40, "APRS EU 144.800", uiControlFontSize)
 	europe.SetColors(rl.Color{R: 68, G: 49, B: 92, A: 255}, rl.Color{R: 175, G: 145, B: 245, A: 255}, colors.text)
 	europe.OnClick(func() { p.tune(144_800_000) })
-	popout := simpleui.NewButton("aprsPopout", 845, 660, 170, 40, "ABRIR TABLA", uiControlFontSize)
+	popout := simpleui.NewButton("aprsPopout", 845, 660, 170, 40, "OPEN TABLE", uiControlFontSize)
 	popout.SetColors(colors.blue, colors.border, colors.text)
 	popout.OnClick(p.openViewer)
 	export := simpleui.NewButton("aprsExport", 1025, 660, 180, 40, "EXPORTAR CSV", uiControlFontSize)
 	export.SetColors(colors.green, colors.border, colors.background)
 	export.OnClick(p.export)
-	clearButton := simpleui.NewButton("aprsClear", 1215, 660, 125, 40, "LIMPIAR", uiControlFontSize)
+	clearButton := simpleui.NewButton("aprsClear", 1215, 660, 125, 40, "CLEAR", uiControlFontSize)
 	clearButton.SetColors(actionClearFill, colors.red, colors.text)
 	clearButton.OnClick(func() {
 		if screen.receiver != nil {
 			screen.receiver.ClearAPRSPackets()
 		}
 		p.scroll, p.selected = 0, -1
-		p.say("HISTORIAL LIMPIADO")
+		p.say("HISTORY CLEARED")
 	})
 	p.controls = append(p.controls, europe, popout, export, clearButton)
 	p.SetVisible(false)
@@ -94,7 +94,7 @@ func (p *APRSPanel) tune(hz int64) {
 	}
 	p.screen.waterfall.Reset()
 	p.screen.markSettingsDirty()
-	p.say("SINTONIZADO EN APRS EUROPA")
+	p.say("TUNED TO APRS EUROPE")
 }
 func (p *APRSPanel) style() {
 	for id, b := range p.buttons {
@@ -180,7 +180,7 @@ func (p *APRSPanel) writeSnapshot(packets []aprs.Packet) {
 	data, err := json.Marshal(packets)
 	if err != nil {
 		p.lastSnapshot = ""
-		p.say("ERROR AL PREPARAR LA TABLA")
+		p.say("ERROR PREPARING TABLE")
 		return
 	}
 	value := string(data)
@@ -201,13 +201,13 @@ func (p *APRSPanel) openViewer() {
 	}
 	executable, err := os.Executable()
 	if err != nil {
-		p.say("ERROR AL ABRIR TABLA")
+		p.say("ERROR OPENING TABLE")
 		return
 	}
 	cmd := exec.Command(executable, "--aprs-viewer", p.snapshotPath)
 	cmd.SysProcAttr = rtl433ViewerProcessAttributes()
 	if err = cmd.Start(); err != nil {
-		p.say("ERROR AL ABRIR TABLA")
+		p.say("ERROR OPENING TABLE")
 		return
 	}
 	p.viewer = cmd
@@ -218,7 +218,7 @@ func (p *APRSPanel) openViewer() {
 }
 func (p *APRSPanel) filtered() []aprs.Packet {
 	packets := p.packets()
-	if p.view == "MENSAJES" {
+	if p.view == "MESSAGES" {
 		out := packets[:0]
 		for _, packet := range packets {
 			if packet.Type == "MESSAGE" || packet.Type == "ACK" || packet.Type == "REJ" {
@@ -241,7 +241,7 @@ func (p *APRSPanel) filtered() []aprs.Packet {
 	return packets
 }
 func (p *APRSPanel) DrawPanel() {
-	status := aprs.Status{State: "NO DISPONIBLE", AudioLevel: -1}
+	status := aprs.Status{State: "UNAVAILABLE", AudioLevel: -1}
 	if p.screen.receiver != nil {
 		status = p.screen.receiver.APRSStatus()
 	}
@@ -253,10 +253,10 @@ func (p *APRSPanel) DrawPanel() {
 		stateColor = colors.red
 	}
 	rl.DrawCircle(720, 646, 6, stateColor)
-	simpleui.DrawTextStyled(fmt.Sprintf("%s · %.3f MHz · NIVEL %s · RX %d · ERR %+.0f Hz", status.State, float64(p.screen.frequencyHz)/1e6, levelText(status.AudioLevel), status.PacketCount, status.FrequencyErrorHz), 735, 638, 12, simpleui.FontSemiBold, colors.muted)
+	simpleui.DrawTextStyled(fmt.Sprintf("%s · %.3f MHz · LEVEL %s · RX %d · ERR %+.0f Hz", status.State, float64(p.screen.frequencyHz)/1e6, levelText(status.AudioLevel), status.PacketCount, status.FrequencyErrorHz), 735, 638, 12, simpleui.FontSemiBold, colors.muted)
 	drawPanel(40, 712, 220, 94)
 	simpleui.DrawTextStyled("RECEPTOR", 52, 721, 12, simpleui.FontSemiBold, colors.cyan)
-	simpleui.DrawText(fmt.Sprintf("KISS  %s", map[bool]string{true: "CONECTADO", false: "ESPERANDO"}[status.KISS]), 52, 745, 13, colors.text)
+	simpleui.DrawText(fmt.Sprintf("KISS  %s", map[bool]string{true: "CONECTADO", false: "WAITING"}[status.KISS]), 52, 745, 13, colors.text)
 	simpleui.DrawText(fmt.Sprintf("COLA %d/16 · DROP %d", status.Queued, status.Dropped), 52, 766, 12, colors.text)
 	simpleui.DrawText(short(status.Detail, 28), 52, 787, 12, colors.muted)
 	if p.view == "RADAR" {
@@ -279,12 +279,12 @@ func (p *APRSPanel) drawTable(packets []aprs.Packet) {
 	headers := []struct {
 		x float32
 		s string
-	}{{288, "HORA"}, {365, "INDICATIVO"}, {485, "TIPO"}, {590, "DESTINO"}, {700, "RUTA"}, {900, "POSICIÓN / MENSAJE"}, {1230, "NIVEL"}}
+	}{{288, "TIME"}, {365, "CALLSIGN"}, {485, "TYPE"}, {590, "DESTINATION"}, {700, "RUTA"}, {900, "POSITION / MESSAGE"}, {1230, "LEVEL"}}
 	for _, h := range headers {
 		simpleui.DrawTextStyled(h.s, h.x, 718, 12, simpleui.FontSemiBold, colors.cyan)
 	}
 	if len(packets) == 0 {
-		simpleui.DrawText("ESPERANDO TRAMAS APRS", 730, 760, 14, colors.muted)
+		simpleui.DrawText("WAITING FOR APRS FRAMES", 730, 760, 14, colors.muted)
 		return
 	}
 	p.scroll = min(p.scroll, max(0, len(packets)-5))
@@ -330,7 +330,7 @@ func (p *APRSPanel) drawRadar() {
 	drawPanel(275, 712, 1275, 94)
 	packets := p.filteredPositions()
 	if len(packets) == 0 {
-		simpleui.DrawText("RADAR OFFLINE · ESPERANDO POSICIONES", 680, 758, 14, colors.muted)
+		simpleui.DrawText("OFFLINE RADAR · WAITING FOR POSITIONS", 680, 758, 14, colors.muted)
 		return
 	}
 	minLat, maxLat, minLon, maxLon := packets[0].Latitude, packets[0].Latitude, packets[0].Longitude, packets[0].Longitude
@@ -353,9 +353,9 @@ func (p *APRSPanel) drawRadar() {
 		rl.DrawCircle(int32(x), int32(y), 4, colors.green)
 		simpleui.DrawText(v.Source, x+7, y-6, 12, colors.text)
 	}
-	simpleui.DrawText("VISTA RELATIVA OFFLINE", 290, 725, 12, colors.cyan)
-	simpleui.DrawText(fmt.Sprintf("%d estaciones con posición", len(packets)), 290, 748, 13, colors.text)
-	simpleui.DrawText("Sin conexión a Internet", 290, 772, 12, colors.muted)
+	simpleui.DrawText("OFFLINE RELATIVE VIEW", 290, 725, 12, colors.cyan)
+	simpleui.DrawText(fmt.Sprintf("%d stations with positions", len(packets)), 290, 748, 13, colors.text)
+	simpleui.DrawText("No Internet connection", 290, 772, 12, colors.muted)
 }
 func (p *APRSPanel) filteredPositions() []aprs.Packet {
 	seen := map[string]bool{}
@@ -373,7 +373,7 @@ func (p *APRSPanel) say(s string) { p.feedback = s; p.feedbackUntil = time.Now()
 func (p *APRSPanel) export() {
 	path, err := exportAPRSCSV(p.filtered())
 	if err != nil {
-		p.say("ERROR AL EXPORTAR")
+		p.say("EXPORT ERROR")
 	} else {
 		p.say("CSV: " + filepath.Base(path))
 	}
@@ -392,7 +392,7 @@ func exportAPRSCSV(packets []aprs.Packet) (string, error) {
 	_, _ = f.Write([]byte{0xef, 0xbb, 0xbf})
 	w := csv.NewWriter(f)
 	w.Comma = ';'
-	_ = w.Write(strings.Split("fecha;hora;indicativo;destino;ruta;tipo;simbolo;coordenadas;locator;rumbo;velocidad;altitud;destino_mensaje;id_mensaje;temperatura;humedad;presion;viento;lluvia;nivel;informacion;trama_raw", ";"))
+	_ = w.Write(strings.Split("date;TIME;CALLSIGN;DESTINATION;ruta;TYPE;simbolo;coordenadas;locator;HEADING;SPEED;ALTITUDE;destino_mensaje;id_mensaje;temperatura;humedad;presion;viento;lluvia;LEVEL;informacion;trama_raw", ";"))
 	for _, p := range packets {
 		_ = w.Write([]string{p.Received.Format("2006-01-02"), p.Received.Format("15:04:05"), p.Source, p.Destination, p.Path, p.Type, p.Symbol, p.Coordinates, p.Locator, p.Course, p.Speed, p.Altitude, p.MessageTarget, p.MessageID, p.Temperature, p.Humidity, p.Pressure, p.Wind, p.Rain, strconv.Itoa(p.ReceiveLevel), p.Summary, p.Raw})
 	}

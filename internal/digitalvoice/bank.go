@@ -69,7 +69,7 @@ func (b *Bank) Start(selection string) error {
 		return firstErr
 	}
 	if firstErr != nil {
-		return fmt.Errorf("algunos modos no pudieron iniciarse: %w", firstErr)
+		return fmt.Errorf("some modes could not start: %w", firstErr)
 	}
 	return nil
 }
@@ -100,11 +100,11 @@ func (b *Bank) Snapshot() Status {
 	decoders := append([]*Decoder(nil), b.decoders...)
 	b.mu.RUnlock()
 	if len(decoders) == 0 {
-		detail := "Pulsa INICIAR para activar la detección"
+		detail := "Press START to enable detection"
 		if !b.available {
-			detail = "Runtime DSD-neo no instalado"
+			detail = "DSD-neo runtime not installed"
 		}
-		return Status{State: "DETENIDO", Detail: detail, Available: b.available, InputDBFS: -60}
+		return Status{State: "STOPPED", Detail: detail, Available: b.available, InputDBFS: -60}
 	}
 	result := decoders[0].Snapshot()
 	result.Events = nil

@@ -30,7 +30,7 @@ var toolMenuItems = []toolMenuItem{
 	{id: "AIS", label: "AIS", icon: "menu-ais.png", row: 1},
 	{id: "AIRCRAFT", label: "ADS-B", icon: "menu-aircraft.png", row: 1},
 	{id: "TETRA", label: "TETRA", icon: "menu-tetra.png", row: 1},
-	{id: "SATELLITES", label: "SATÉLITES", row: 2},
+	{id: "SATELLITES", label: "SATELLITES", row: 2},
 }
 
 type ToolMenu struct {
@@ -122,7 +122,7 @@ func (menu *ToolMenu) DrawOverlay() {
 	}
 	rl.DrawRectangleRounded(back, .2, 8, backColor)
 	rl.DrawRectangleRoundedLinesEx(back, .2, 8, 2, rl.Color{R: 130, G: 145, B: 160, A: 255})
-	drawCenteredStyled("VOLVER", back, 17, simpleui.FontSemiBold, simpleui.EnsureTextContrast(colors.text, backColor))
+	drawCenteredStyled("BACK", back, 17, simpleui.FontSemiBold, simpleui.EnsureTextContrast(colors.text, backColor))
 }
 
 func (menu *ToolMenu) drawCategory(row int, label string, accent rl.Color) {

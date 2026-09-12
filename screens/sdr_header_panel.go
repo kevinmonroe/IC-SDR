@@ -115,7 +115,7 @@ func (p *SDRHeaderPanel) submit() {
 func (p *SDRHeaderPanel) refresh() {
 	s := p.current
 	rtl := s.Driver == "rtlsdr"
-	status := "SDR · SIN DISPOSITIVO"
+	status := "SDR · NO DEVICE"
 	if s.Available {
 		status = fmt.Sprintf("SDR %s · %s", s.Device, s.Driver)
 	}

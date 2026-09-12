@@ -17,6 +17,6 @@ func TestVisibleMemoryMarkersIgnoreTableFilters(t *testing.T) {
 
 	indices := panel.visibleMarkerIndices()
 	if len(indices) != 2 || indices[0] != 0 || indices[1] != 1 {
-		t.Fatalf("marcadores visibles = %v; se esperaban todas las memorias dentro del FFT", indices)
+		t.Fatalf("marcadores visibles = %v; se esperaban ALL las MEMORIES dentro del FFT", indices)
 	}
 }

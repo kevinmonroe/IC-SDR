@@ -57,7 +57,7 @@ func New(inputRate float64, executable, configPath, workingDirectory string) *De
 	if absolute, err := filepath.Abs(workingDirectory); err == nil {
 		workingDirectory = absolute
 	}
-	return &Decoder{inputRate: inputRate, executable: executable, configTemplate: configPath, workingDirectory: workingDirectory, state: "DETENIDO", audioLevel: -1, recentPackets: make(map[string]time.Time)}
+	return &Decoder{inputRate: inputRate, executable: executable, configTemplate: configPath, workingDirectory: workingDirectory, state: "STOPPED", audioLevel: -1, recentPackets: make(map[string]time.Time)}
 }
 func (d *Decoder) Configure(enabled bool, tuned, center int64, bandwidth int) {
 	if !enabled {
@@ -79,7 +79,7 @@ func (d *Decoder) Configure(enabled bool, tuned, center int64, bandwidth int) {
 }
 func (d *Decoder) start() {
 	if d.executable == "" {
-		d.setError(fmt.Errorf("Dire Wolf no configurado"))
+		d.setError(fmt.Errorf("Dire Wolf not configured"))
 		return
 	}
 	port, err := freePort()
@@ -133,7 +133,7 @@ func freePort() (int, error) {
 		_ = listener.Close()
 		return port, nil
 	}
-	return 0, fmt.Errorf("no hay un puerto KISS libre entre 18101 y 18199")
+	return 0, fmt.Errorf("no free KISS port between 18101 and 18199")
 }
 func (d *Decoder) runtimeConfig(port int) (string, error) {
 	data, err := os.ReadFile(d.configTemplate)
@@ -224,7 +224,7 @@ func (d *Decoder) connectKISS(port int, session uint64) {
 		}
 		d.mu.Lock()
 		d.kiss = connection
-		d.detail = "KISS conectado · esperando AX.25"
+		d.detail = "KISS connected · waiting for AX.25"
 		d.mu.Unlock()
 		d.readKISS(connection, session)
 		_ = connection.Close()
@@ -346,7 +346,7 @@ func (d *Decoder) Clear() {
 	d.packets = nil
 	d.recentPackets = make(map[string]time.Time)
 	d.state = "BUSCANDO"
-	d.detail = "Esperando tramas AX.25"
+	d.detail = "Waiting for AX.25 frames"
 	d.mu.Unlock()
 	d.packetCount.Store(0)
 }
@@ -380,7 +380,7 @@ func (d *Decoder) Stop() {
 		_ = os.Remove(d.configPath)
 	}
 	d.mu.Lock()
-	d.state, d.detail, d.audioLevel = "DETENIDO", "", -1
+	d.state, d.detail, d.audioLevel = "STOPPED", "", -1
 	d.kiss = nil
 	d.mu.Unlock()
 }

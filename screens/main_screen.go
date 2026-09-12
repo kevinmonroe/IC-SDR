@@ -900,7 +900,7 @@ func (screen *MainScreen) drawSpectrum() {
 	} else {
 		message := screen.stats.Status
 		if message == "" {
-			message = "Esperando stream IQ…"
+			message = "Waiting for IQ stream…"
 		}
 		simpleui.DrawText(message, x+48, y+height*.5, 13, colors.orange)
 	}
@@ -1094,7 +1094,7 @@ func (screen *MainScreen) drawLowerWorkspace() {
 			screen.satellitePanel.DrawPanel()
 		} else {
 			drawSmallText(toolDisplayName(screen.activeTool), 40, toolY+14, colors.cyan)
-			simpleui.DrawText("Esta herramienta se implementará en la siguiente fase. Pulsa MENU para cambiar de tool.", 40, toolY+48, 10, colors.muted)
+			simpleui.DrawText("This tool will be implemented in the next phase. Press MENU to switch tools.", 40, toolY+48, 10, colors.muted)
 		}
 	})
 }

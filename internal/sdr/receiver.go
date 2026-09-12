@@ -180,18 +180,18 @@ func NewReceiver(config Config) *Receiver {
 }
 
 func (receiver *Receiver) Start() error {
-	receiver.trace("SDR: buscando candidatos de dispositivo")
+	receiver.trace("SDR: searching for device candidates")
 	device, err := openSoapy(receiver.config)
 	if err != nil {
 		receiver.setError(err)
 		return err
 	}
 	receiver.device = device
-	receiver.trace("SDR: dispositivo abierto · hardware=%s · driver=%s", device.hardware, device.driver)
-	receiver.trace("SDR: leyendo controles físicos")
+	receiver.trace("SDR: device opened · hardware=%s · driver=%s", device.hardware, device.driver)
+	receiver.trace("SDR: reading hardware controls")
 	hardware := device.hardwareSettings()
 	if receiver.config.InitialHardware != nil {
-		receiver.trace("SDR: aplicando ajustes iniciales")
+		receiver.trace("SDR: applying initial settings")
 		initial := *receiver.config.InitialHardware
 		initial.Available = true
 		initial.Device = hardware.Device
@@ -204,18 +204,18 @@ func (receiver *Receiver) Start() error {
 		}
 		hardware = device.hardwareSettings()
 	}
-	receiver.trace("SDR: ajustes confirmados · sampleRate=%.0f", device.sampleRate)
+	receiver.trace("SDR: settings confirmed · sampleRate=%.0f", device.sampleRate)
 	receiver.mu.Lock()
 	receiver.stats.Device = device.hardware
 	receiver.stats.SampleRate = device.sampleRate
 	receiver.stats.SpectrumCenterHz = receiver.config.FrequencyHz
-	receiver.stats.Status = "IQ esperando primeras muestras"
+	receiver.stats.Status = "IQ waiting for first samples"
 	receiver.hardware = hardware
 	receiver.mu.Unlock()
 	receiver.running.Store(true)
 	go receiver.run()
 	go receiver.runTuner()
-	receiver.trace("SDR: hilos de captura y sintonía iniciados")
+	receiver.trace("SDR: capture and tuning threads started")
 	return nil
 }
 
@@ -351,14 +351,14 @@ func (receiver *Receiver) DMRStatus() dmr.Status {
 
 func (receiver *Receiver) DigitalVoiceStatus() digitalvoice.Status {
 	if receiver.digital == nil {
-		return digitalvoice.Status{State: "NO DISPONIBLE", Detail: "Runtime DSD-neo no configurado"}
+		return digitalvoice.Status{State: "UNAVAILABLE", Detail: "DSD-neo runtime not configured"}
 	}
 	return receiver.digital.Snapshot()
 }
 
 func (receiver *Receiver) StartDigitalVoice(mode string) error {
 	if receiver.digital == nil {
-		return fmt.Errorf("decodificador digital no disponible")
+		return fmt.Errorf("digital decoder unavailable")
 	}
 	return receiver.digital.Start(mode)
 }
@@ -427,7 +427,7 @@ func (receiver *Receiver) ConfigureSSTV(enabled bool) {
 }
 func (receiver *Receiver) SSTVStatus() sstv.Status {
 	if receiver.sstv == nil {
-		return sstv.Status{State: "NO DISPONIBLE"}
+		return sstv.Status{State: "UNAVAILABLE"}
 	}
 	return receiver.sstv.Snapshot()
 }
@@ -465,7 +465,7 @@ func (receiver *Receiver) RestartSSTV() bool {
 }
 func (receiver *Receiver) SaveSSTVPartial() (string, error) {
 	if receiver.sstv == nil {
-		return "", fmt.Errorf("SSTV no disponible")
+		return "", fmt.Errorf("SSTV unavailable")
 	}
 	return receiver.sstv.SavePartial()
 }
@@ -487,7 +487,7 @@ func (receiver *Receiver) ConfigureRTL433(enabled bool, frequencyHz int64, bandw
 }
 func (receiver *Receiver) RTL433Status() rtl433.Status {
 	if receiver.rtl433 == nil {
-		return rtl433.Status{State: "NO DISPONIBLE"}
+		return rtl433.Status{State: "UNAVAILABLE"}
 	}
 	return receiver.rtl433.Snapshot()
 }
@@ -510,7 +510,7 @@ func (receiver *Receiver) ConfigureAPRS(enabled bool, frequencyHz int64, bandwid
 }
 func (receiver *Receiver) APRSStatus() aprs.Status {
 	if receiver.aprs == nil {
-		return aprs.Status{State: "NO DISPONIBLE", AudioLevel: -1}
+		return aprs.Status{State: "UNAVAILABLE", AudioLevel: -1}
 	}
 	return receiver.aprs.Snapshot()
 }
@@ -685,7 +685,7 @@ func (receiver *Receiver) run() {
 		receiver.stats.RMS = rms
 		receiver.stats.Peak = peak
 		receiver.stats.InvalidSamples += invalid
-		receiver.stats.Status = "IQ válido"
+		receiver.stats.Status = "IQ valid"
 		receiver.mu.Unlock()
 
 		source := 0

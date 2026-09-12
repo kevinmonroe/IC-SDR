@@ -205,7 +205,7 @@ func loadAppSettings(path string, screen *MainScreen) {
 	if settings.RTL433BandwidthHz == 250_000 || settings.RTL433BandwidthHz == 500_000 || settings.RTL433BandwidthHz == 1_000_000 || settings.RTL433BandwidthHz == 2_000_000 {
 		screen.rtl433BandwidthHz = settings.RTL433BandwidthHz
 	}
-	if settings.APRSView == "PAQUETES" || settings.APRSView == "ESTACIONES" || settings.APRSView == "MENSAJES" || settings.APRSView == "RADAR" || settings.APRSView == "RAW" {
+	if settings.APRSView == "PAQUETES" || settings.APRSView == "ESTACIONES" || settings.APRSView == "MESSAGES" || settings.APRSView == "RADAR" || settings.APRSView == "RAW" {
 		screen.aprsView = settings.APRSView
 	}
 	if settings.SubtoneMode == "AUTO" || settings.SubtoneMode == "CTCSS" || settings.SubtoneMode == "DCS" || settings.SubtoneMode == "OFF" {

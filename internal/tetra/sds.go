@@ -29,7 +29,7 @@ func parseSDS(bits []byte, ssi uint32, now time.Time) (Message, *Position, bool)
 		if !ok {
 			return Message{}, nil, false
 		}
-		text := fmt.Sprintf("%.6f, %.6f · %.1f km/h · rumbo %.1f° · precisión %.0f m", position.Latitude, position.Longitude, position.SpeedKmh, position.Heading, position.AccuracyM)
+		text := fmt.Sprintf("%.6f, %.6f · %.1f km/h · heading %.1f° · accuracy %.0f m", position.Latitude, position.Longitude, position.SpeedKmh, position.Heading, position.AccuracyM)
 		message.Kind, message.Text, message.Recognized = "GPS / LIP", text, true
 		return message, &position, true
 	}

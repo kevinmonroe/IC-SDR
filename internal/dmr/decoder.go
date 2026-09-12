@@ -183,7 +183,7 @@ func (d *Decoder) start() error {
 		return err
 	}
 	if _, err = os.Stat(exePath); err != nil {
-		d.status.State, d.status.Detail = "ERROR", "No se encuentra el decoder DMR"
+		d.status.State, d.status.Detail = "ERROR", "DMR decoder not found"
 		d.mu.Unlock()
 		return err
 	}
@@ -239,9 +239,9 @@ func (d *Decoder) start() error {
 		d.process, d.stdin, d.front = nil, nil, nil
 		d.status.State = "ERROR"
 		if err != nil {
-			d.status.Detail = "El decoder DMR terminó: " + err.Error()
+			d.status.Detail = "The DMR decoder stopped: " + err.Error()
 		} else {
-			d.status.Detail = "El decoder DMR terminó"
+			d.status.Detail = "The DMR decoder stopped"
 		}
 		shouldRestart := d.desiredEnabled && d.restartAttempts < 3 && !d.resyncing
 		restartAttempt := 0
@@ -348,7 +348,7 @@ func (d *Decoder) failGeneration(generation uint64, err error) {
 	if d.generation != generation || !d.enabled.Load() {
 		return
 	}
-	d.status.State, d.status.Detail = "ERROR", "Fallo en el flujo DMR: "+err.Error()
+	d.status.State, d.status.Detail = "ERROR", "DMR stream failure: "+err.Error()
 	if d.stdin != nil {
 		_ = d.stdin.Close()
 	}

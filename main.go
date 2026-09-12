@@ -25,7 +25,7 @@ func main() {
 	var err error
 	startupLogFile, err = configureStartupLog()
 	if err != nil {
-		showStartupError("IC-SDR no puede crear DATA\\logs\\startup.log:\n\n" + err.Error() + "\n\nCompruebe que la carpeta portable permite escritura.")
+		showStartupError("IC-SDR cannot create DATA\\logs\\startup.log:\n\n" + err.Error() + "\n\nMake sure the portable folder is writable.")
 		return
 	}
 	if startupLogFile != nil {
@@ -38,11 +38,11 @@ func main() {
 			showStartupError(message)
 		}
 	}()
-	startupStep("Proceso iniciado · PID=%d · %s/%s · Go=%s", os.Getpid(), runtime.GOOS, runtime.GOARCH, runtime.Version())
+	startupStep("Process started · PID=%d · %s/%s · Go=%s", os.Getpid(), runtime.GOOS, runtime.GOARCH, runtime.Version())
 	executable, executableErr := os.Executable()
 	workingDirectory, workingErr := os.Getwd()
-	startupStep("Ejecutable=%q (error=%v)", executable, executableErr)
-	startupStep("Directorio de trabajo=%q (error=%v)", workingDirectory, workingErr)
+	startupStep("Executable=%q (error=%v)", executable, executableErr)
+	startupStep("Working directory=%q (error=%v)", workingDirectory, workingErr)
 	startupStep("Argumentos=%q", os.Args)
 	startupStep("DATA=%q", resources.WritablePath())
 	stopWatchdog := startStartupWatchdog()
@@ -59,17 +59,17 @@ func main() {
 		return
 	}
 	if len(os.Args) == 3 && os.Args[1] == "--ais-map" {
-		startupStep("Abriendo mapa AIS")
+		startupStep("Opening AIS map")
 		screens.RunAISMap(os.Args[2])
 		return
 	}
 	if len(os.Args) == 3 && os.Args[1] == "--aircraft-map" {
-		startupStep("Abriendo mapa ADS-B")
+		startupStep("Opening ADS-B map")
 		screens.RunAircraftMap(os.Args[2])
 		return
 	}
 	if len(os.Args) == 3 && os.Args[1] == "--satellite-map" {
-		startupStep("Abriendo mapa de satélites")
+		startupStep("Opening satellite map")
 		screens.RunSatelliteMap(os.Args[2])
 		return
 	}
@@ -93,7 +93,7 @@ func main() {
 	}
 	startupStep("Comprobando recursos portables")
 	logPortableResources()
-	startupStep("Construyendo receptor y decodificadores")
+	startupStep("Building receiver and decoders")
 	receiver := sdr.NewReceiver(sdr.Config{
 		RuntimeRoot: resources.Path("runtime", "windows-x64"),
 		Driver:      "sdrplay",
@@ -122,11 +122,11 @@ func main() {
 		StartupLog:                startupStep,
 	})
 	startupStep("Receptor construido")
-	startupStep("Abriendo dispositivo SDR")
+	startupStep("Opening SDR device")
 	if err := receiver.Start(); err != nil {
-		startupStep("El receptor no se pudo iniciar; la interfaz continuará disponible: %v", err)
+		startupStep("The receiver could not start; the interface will remain available: %v", err)
 	} else {
-		startupStep("Dispositivo SDR iniciado correctamente")
+		startupStep("SDR device started successfully")
 	}
 	defer receiver.Close()
 
@@ -134,13 +134,13 @@ func main() {
 	mainScreen := screens.NewMainScreen(receiver)
 	startupStep("MainScreen creado")
 	defer mainScreen.Close()
-	startupStep("Creando controles")
+	startupStep("Creating controls")
 	mainScreen.CreateControls()
 	startupStep("Controles creados")
 	var firstFrame sync.Once
 	simpleui.Run(func() {
 		firstFrame.Do(func() {
-			startupStep("Primera trama de interfaz iniciada; arranque completado")
+			startupStep("First interface frame started; startup complete")
 			stopWatchdog()
 		})
 		mainScreen.Draw()
@@ -172,7 +172,7 @@ func configureStartupLog() (*os.File, error) {
 func startupStep(format string, args ...any) {
 	message := fmt.Sprintf(format, args...)
 	startupStage.Store(message)
-	log.Print("PASO · " + message)
+	log.Print("STEP · " + message)
 	if startupLogFile != nil {
 		_ = startupLogFile.Sync()
 	}
@@ -188,7 +188,7 @@ func startStartupWatchdog() func() {
 			select {
 			case <-ticker.C:
 				stage, _ := startupStage.Load().(string)
-				log.Printf("ESPERA · el proceso sigue dentro de: %s", stage)
+				log.Printf("WAIT · process still running in: %s", stage)
 				if startupLogFile != nil {
 					_ = startupLogFile.Sync()
 				}

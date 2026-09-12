@@ -12,7 +12,7 @@ import (
 	"go-zero/simpleui"
 )
 
-var tetraTabs = []string{"RED", "CELDAS", "GRUPOS", "USUARIOS", "MENSAJES", "GPS", "CONSOLA"}
+var tetraTabs = []string{"RED", "CELDAS", "GROUPS", "USUARIOS", "MESSAGES", "GPS", "CONSOLA"}
 
 func RunTETRAViewer(path, settingsPath string) {
 	simpleui.SetMode(1400, 780, simpleui.Fit)
@@ -78,9 +78,9 @@ func (v *tetraViewer) draw() {
 	simpleui.DrawTextStyled("MONITOR TETRA", 28, 22, 24, simpleui.FontSemiBold, colors.cyan)
 	state := v.snapshot.Status.State
 	if state == "" {
-		state = "ESPERANDO DATOS"
+		state = "WAITING FOR DATA"
 	}
-	simpleui.DrawText(fmt.Sprintf("%.6f MHz · %s · actualización %s", float64(v.snapshot.FrequencyHz)/1e6, state, viewerTime(v.snapshot.Updated)), 28, 56, 13, colors.muted)
+	simpleui.DrawText(fmt.Sprintf("%.6f MHz · %s · updated %s", float64(v.snapshot.FrequencyHz)/1e6, state, viewerTime(v.snapshot.Updated)), 28, 56, 13, colors.muted)
 	mouse := simpleui.MousePosition()
 	for i, name := range tetraTabs {
 		b := rl.Rectangle{X: 24 + float32(i)*193, Y: 88, Width: 179, Height: 45}
@@ -117,13 +117,13 @@ func (v *tetraViewer) draw() {
 func (v *tetraViewer) drawNeighbours() {
 	simpleui.DrawTextStyled("CELDAS VECINAS · D-NWRK-BROADCAST", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
 	if len(v.snapshot.Neighbours) == 0 {
-		simpleui.DrawText("Esperando anuncios de celdas vecinas…", 48, 235, 14, colors.muted)
+		simpleui.DrawText("Waiting for neighboring-cell announcements…", 48, 235, 14, colors.muted)
 		return
 	}
 	columns := []struct {
 		x    float32
 		text string
-	}{{48, "CELDA"}, {145, "FRECUENCIA"}, {350, "CARRIER"}, {480, "MCC"}, {560, "MNC"}, {650, "LA"}, {750, "SYNC"}, {850, "SERVICIO"}, {990, "VOZ"}, {1090, "ACTUALIZADA"}}
+	}{{48, "CELDA"}, {145, "FREQUENCY"}, {350, "CARRIER"}, {480, "MCC"}, {560, "MNC"}, {650, "LA"}, {750, "SYNC"}, {850, "SERVICIO"}, {990, "VOZ"}, {1090, "UPDATED"}}
 	for _, column := range columns {
 		simpleui.DrawTextStyled(column.text, column.x, 215, 12, simpleui.FontSemiBold, colors.cyan)
 	}
@@ -141,7 +141,7 @@ func (v *tetraViewer) drawNeighbours() {
 		}
 		syncText, syncColor := "NO", colors.muted
 		if n.Synchronized {
-			syncText, syncColor = "SÍ", colors.green
+			syncText, syncColor = "YES", colors.green
 		}
 		voiceText := "—"
 		if n.Voice {
@@ -166,7 +166,7 @@ func (v *tetraViewer) drawNeighbours() {
 			}
 		}
 	}
-	simpleui.DrawText("Haz clic en una celda con frecuencia conocida para sintonizarla.", 48, 704, 12, colors.muted)
+	simpleui.DrawText("Click a cell with a known frequency to tune it.", 48, 704, 12, colors.muted)
 }
 func (v *tetraViewer) drawGroups() {
 	simpleui.DrawTextStyled("LLAMADAS Y DESTINOS CMCE", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
@@ -174,7 +174,7 @@ func (v *tetraViewer) drawGroups() {
 		for _, column := range []struct {
 			x float32
 			t string
-		}{{48, "CALL ID"}, {180, "SSI / DESTINO"}, {390, "TS"}, {465, "USAGE"}, {570, "ESTADO"}, {830, "CIFRADO"}, {1010, "ÚLTIMO EVENTO"}} {
+		}{{48, "CALL ID"}, {180, "SSI / DESTINATION"}, {390, "TS"}, {465, "USAGE"}, {570, "STATUS"}, {830, "ENCRYPTED"}, {1010, "LAST EVENT"}} {
 			simpleui.DrawTextStyled(column.t, column.x, 214, 12, simpleui.FontSemiBold, colors.cyan)
 		}
 		for i, call := range v.snapshot.Calls {
@@ -186,14 +186,14 @@ func (v *tetraViewer) drawGroups() {
 				rl.DrawRectangle(38, int32(y-3), 1300, 27, colors.panel)
 			}
 			stateColor := colors.muted
-			activity := "FINALIZADA"
+			activity := "ENDED"
 			if call.Active {
-				stateColor, activity = colors.green, "ACTIVA"
+				stateColor, activity = colors.green, "ACTIVE"
 			}
 			cipher := "CLARO"
 			cipherColor := colors.green
 			if call.Encrypted {
-				cipher, cipherColor = "CIFRADO", colors.orange
+				cipher, cipherColor = "ENCRYPTED", colors.orange
 			}
 			simpleui.DrawTextStyled(fmt.Sprintf("%d", call.ID), 48, y, 13, simpleui.FontMono, colors.text)
 			simpleui.DrawTextStyled(fmt.Sprintf("%08d", call.SSI), 180, y, 13, simpleui.FontMono, colors.text)
@@ -205,9 +205,9 @@ func (v *tetraViewer) drawGroups() {
 		}
 		return
 	}
-	simpleui.DrawText("Se muestran destinos observados en señalización clara; esperando un Call ID confirmado.", 48, 207, 12, colors.muted)
+	simpleui.DrawText("Showing destinations observed in clear signaling; waiting for a confirmed Call ID.", 48, 207, 12, colors.muted)
 	if len(v.snapshot.Groups) == 0 {
-		simpleui.DrawText("Esperando D-SETUP, D-CONNECT o D-TX GRANTED…", 48, 260, 14, colors.muted)
+		simpleui.DrawText("WAITING D-SETUP, D-CONNECT o D-TX GRANTED…", 48, 260, 14, colors.muted)
 		return
 	}
 	for i, g := range v.snapshot.Groups {
@@ -221,20 +221,20 @@ func (v *tetraViewer) drawGroups() {
 		simpleui.DrawTextStyled(fmt.Sprintf("%08d", g.ID), 48, y, 14, simpleui.FontMono, colors.text)
 		simpleui.DrawText(g.Name, 270, y, 13, colors.text)
 		simpleui.DrawText(g.LastEvent, 530, y, 13, colors.cyan)
-		simpleui.DrawText(fmt.Sprintf("%d eventos", g.Calls), 790, y, 13, colors.text)
+		simpleui.DrawText(fmt.Sprintf("%d events", g.Calls), 790, y, 13, colors.text)
 		simpleui.DrawText(viewerTime(g.LastSeen), 1020, y, 13, colors.text)
 	}
 }
 func (v *tetraViewer) drawMessages() {
 	simpleui.DrawTextStyled("EVENTOS CMCE / SDS", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
 	if len(v.snapshot.Messages) == 0 {
-		simpleui.DrawText("Esperando señalización CMCE sin cifrar…", 48, 235, 14, colors.muted)
+		simpleui.DrawText("Waiting for unencrypted CMCE signaling…", 48, 235, 14, colors.muted)
 		return
 	}
 	columns := []struct {
 		x    float32
 		text string
-	}{{48, "HORA"}, {150, "TIPO"}, {315, "SSI"}, {425, "PARTY SSI"}, {550, "TS"}, {590, "PROTOCOLO"}, {755, "CIF."}, {805, "CONTENIDO / DIAGNÓSTICO"}}
+	}{{48, "TIME"}, {150, "TYPE"}, {315, "SSI"}, {425, "PARTY SSI"}, {550, "TS"}, {590, "PROTOCOLO"}, {755, "CIF."}, {805, "CONTENT / DIAGNOSTICS"}}
 	for _, column := range columns {
 		simpleui.DrawTextStyled(column.text, column.x, 210, 11, simpleui.FontSemiBold, colors.cyan)
 	}
@@ -269,7 +269,7 @@ func (v *tetraViewer) drawMessages() {
 		simpleui.DrawText(viewerTime(m.Time), 48, y, 12, colors.muted)
 		cipher, cipherColor := "NO", colors.green
 		if m.Encrypted {
-			cipher, cipherColor = "SÍ", colors.red
+			cipher, cipherColor = "YES", colors.red
 		}
 		simpleui.DrawTextStyled(sondeClip(m.Kind, 21), 150, y, 12, simpleui.FontSemiBold, kindColor)
 		simpleui.DrawTextStyled(viewerSSI(m.AddressSSI), 315, y, 12, simpleui.FontMono, colors.text)
@@ -279,7 +279,7 @@ func (v *tetraViewer) drawMessages() {
 		simpleui.DrawText(cipher, 755, y, 12, cipherColor)
 		simpleui.DrawText(sondeClip(detail, 68), 805, y, 12, colors.text)
 	}
-	simpleui.DrawText(fmt.Sprintf("%d eventos conservados · naranja = SDS pendiente de interpretar", len(v.snapshot.Messages)), 48, 716, 12, colors.muted)
+	simpleui.DrawText(fmt.Sprintf("%d retained events · orange = SDS pending interpretation", len(v.snapshot.Messages)), 48, 716, 12, colors.muted)
 }
 
 func viewerSSI(ssi uint32) string {
@@ -293,12 +293,12 @@ func (v *tetraViewer) drawUsers() {
 	cols := []struct {
 		x     float32
 		label string
-	}{{48, "SSI"}, {260, "TIPO"}, {430, "TIMESLOT"}, {590, "CIFRADO"}, {760, "VISTO"}, {940, "ÚLTIMA ACTIVIDAD"}}
+	}{{48, "SSI"}, {260, "TYPE"}, {430, "TIMESLOT"}, {590, "ENCRYPTED"}, {760, "VISTO"}, {940, "LAST ACTIVITY"}}
 	for _, c := range cols {
 		simpleui.DrawTextStyled(c.label, c.x, 220, 13, simpleui.FontSemiBold, colors.cyan)
 	}
 	if len(v.snapshot.Users) == 0 {
-		simpleui.DrawText("Esperando MAC-RESOURCE con CRC SCH/F válido…", 48, 270, 14, colors.muted)
+		simpleui.DrawText("Waiting for MAC-RESOURCE with a valid SCH/F CRC…", 48, 270, 14, colors.muted)
 		return
 	}
 	for i, u := range v.snapshot.Users {
@@ -312,7 +312,7 @@ func (v *tetraViewer) drawUsers() {
 		kind := map[uint8]string{1: "SSI", 3: "USSI", 4: "SMI", 5: "SSI+EVENT", 6: "SSI+USAGE", 7: "SMI+EVENT"}[u.AddressType]
 		enc, color := "CLARO", colors.green
 		if u.Encrypted {
-			enc, color = "CIFRADO", colors.orange
+			enc, color = "ENCRYPTED", colors.orange
 		}
 		simpleui.DrawTextStyled(fmt.Sprintf("%08d", u.SSI), 48, y, 14, simpleui.FontMono, colors.text)
 		simpleui.DrawText(kind, 260, y, 13, colors.text)
@@ -326,7 +326,7 @@ func (v *tetraViewer) drawNetwork() {
 	s := v.snapshot.Status
 	simpleui.DrawTextStyled("RED Y CELDA SERVIDORA", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
 	if !s.System.Valid {
-		simpleui.DrawText("Esperando un bloque BSCH válido…", 48, 220, 15, colors.muted)
+		simpleui.DrawText("Waiting for a valid BSCH block…", 48, 220, 15, colors.muted)
 		return
 	}
 	cards := []struct{ label, value string }{{"MCC", fmt.Sprint(s.System.MCC)}, {"MNC", fmt.Sprint(s.System.MNC)}, {"COLOR", fmt.Sprint(s.System.ColourCode)}, {"TIMESLOT", fmt.Sprint(s.System.Timeslot)}, {"FRAME", fmt.Sprint(s.System.Frame)}, {"MULTIFRAME", fmt.Sprint(s.System.Multiframe)}}
@@ -337,11 +337,11 @@ func (v *tetraViewer) drawNetwork() {
 		simpleui.DrawText(c.label, x+18, y+15, 12, colors.muted)
 		simpleui.DrawTextStyled(c.value, x+18, y+43, 30, simpleui.FontMono, colors.text)
 	}
-	simpleui.DrawText(fmt.Sprintf("SYNC %d · NTS1 %d · CRC fallidos %d · calidad %.0f%%", s.SyncHits, s.NormalBursts, s.BSCHFailures, s.Quality), 48, 505, 14, colors.green)
+	simpleui.DrawText(fmt.Sprintf("SYNC %d · NTS1 %d · CRC failures %d · quality %.0f%%", s.SyncHits, s.NormalBursts, s.BSCHFailures, s.Quality), 48, 505, 14, colors.green)
 	if s.Network.Valid {
-		simpleui.DrawText(fmt.Sprintf("SYSINFO · PORTADORA %d · BANDA %d · DL %.6f MHz · UL %.6f MHz · LA %d · SERVICIOS %03X", s.Network.MainCarrier, s.Network.FrequencyBand, float64(s.Network.DownlinkHz)/1e6, float64(s.Network.UplinkHz)/1e6, s.Network.LocationArea, s.Network.ServiceDetails), 48, 530, 13, colors.cyan)
+		simpleui.DrawText(fmt.Sprintf("SYSINFO · PORTADORA %d · BAND %d · DL %.6f MHz · UL %.6f MHz · LA %d · SERVICIOS %03X", s.Network.MainCarrier, s.Network.FrequencyBand, float64(s.Network.DownlinkHz)/1e6, float64(s.Network.UplinkHz)/1e6, s.Network.LocationArea, s.Network.ServiceDetails), 48, 530, 13, colors.cyan)
 	}
-	simpleui.DrawTextStyled("ACTIVIDAD POR TIMESLOT", 48, 565, 14, simpleui.FontSemiBold, colors.cyan)
+	simpleui.DrawTextStyled("ACTIVITY BY TIMESLOT", 48, 565, 14, simpleui.FontSemiBold, colors.cyan)
 	maxBursts := uint64(1)
 	for _, n := range s.SlotBursts {
 		if n > maxBursts {
@@ -360,7 +360,7 @@ func (v *tetraViewer) drawEmpty(title string, count int, hint string) {
 	simpleui.DrawTextStyled(title, 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
 	simpleui.DrawText(fmt.Sprintf("%d elementos", count), 48, 212, 14, colors.text)
 	simpleui.DrawText(hint, 48, 260, 14, colors.muted)
-	simpleui.DrawText("La ventana ya recibe el snapshot en vivo y conservará esta pestaña durante la siguiente fase de protocolo.", 48, 292, 13, colors.muted)
+	simpleui.DrawText("This window receives the live snapshot and will keep this tab during the next protocol phase.", 48, 292, 13, colors.muted)
 }
 func (v *tetraViewer) drawGPS() {
 	simpleui.DrawTextStyled("POSICIONES GPS / LIP", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
@@ -375,9 +375,9 @@ func (v *tetraViewer) drawGPS() {
 		y := mapBox.Y + mapBox.Height*float32(i)/6
 		rl.DrawLine(int32(mapBox.X), int32(y), int32(mapBox.X+mapBox.Width), int32(y), colors.grid)
 	}
-	simpleui.DrawText(fmt.Sprintf("%d posiciones", len(v.snapshot.Positions)), 990, 230, 15, colors.text)
+	simpleui.DrawText(fmt.Sprintf("%d positions", len(v.snapshot.Positions)), 990, 230, 15, colors.text)
 	if len(v.snapshot.Positions) == 0 {
-		simpleui.DrawText("Esperando mensajes LIP", 990, 270, 13, colors.muted)
+		simpleui.DrawText("Waiting for LIP messages", 990, 270, 13, colors.muted)
 		return
 	}
 	for i, p := range v.snapshot.Positions {
@@ -391,8 +391,8 @@ func (v *tetraViewer) drawGPS() {
 }
 func (v *tetraViewer) drawConsole() {
 	s := v.snapshot.Status
-	simpleui.DrawTextStyled("CONSOLA TÉCNICA", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
-	lines := []string{fmt.Sprintf("Estado              %s", s.State), fmt.Sprintf("Entrada/canal       %.0f / %.0f S/s", s.InputRate, s.OutputRate), fmt.Sprintf("Nivel/calidad/AFC   %.1f dBFS / %.1f%% / %+.1f Hz", s.LevelDBFS, s.Quality, s.FrequencyErrorHz), fmt.Sprintf("Timing fase/error   %d / %.3f rad", s.TimingPhase, s.TimingError), fmt.Sprintf("BER / FER           %.2f%% / %.1f%%", s.BER, s.FER), fmt.Sprintf("Decisión de audio   %s", s.LastAudioDecision), fmt.Sprintf("Rechazo E/U/I/D     %d / %d / %d / %d", s.AudioRejectedEncrypted, s.AudioRejectedUnselected, s.AudioRejectedInactive, s.AudioRejectedDamaged), fmt.Sprintf("SYNC / NTS          %d / %d", s.SyncHits, s.NormalBursts), fmt.Sprintf("Actividad TS        %d / %d / %d / %d", s.SlotBursts[0], s.SlotBursts[1], s.SlotBursts[2], s.SlotBursts[3]), fmt.Sprintf("SCH válido/fallo    %d / %d", s.SCHValid, s.SCHCRCFailures), fmt.Sprintf("MAC R/F/B/S         %d / %d / %d / %d", s.MACPDUTypes[0], s.MACPDUTypes[1], s.MACPDUTypes[2], s.MACPDUTypes[3]), fmt.Sprintf("RESOURCE/rechazo    %d / %d", s.MACResources, s.MACRejected), fmt.Sprintf("Asignación/cifrado  %d / %d", s.MACChannelAlloc, s.MACEncrypted), fmt.Sprintf("LLC tipos 0..7      %d %d %d %d %d %d %d %d", s.LLCTypes[0], s.LLCTypes[1], s.LLCTypes[2], s.LLCTypes[3], s.LLCTypes[4], s.LLCTypes[5], s.LLCTypes[6], s.LLCTypes[7]), fmt.Sprintf("LLC tipos 8..15     %d %d %d %d %d %d %d %d", s.LLCTypes[8], s.LLCTypes[9], s.LLCTypes[10], s.LLCTypes[11], s.LLCTypes[12], s.LLCTypes[13], s.LLCTypes[14], s.LLCTypes[15]), fmt.Sprintf("Fragmentos/unidos   %d / %d", s.LLCFragments, s.LLCReassembled), fmt.Sprintf("MLE MM/CMCE/SNDCP   %d / %d / %d", s.MLEProtocols[1], s.MLEProtocols[2], s.MLEProtocols[4]), fmt.Sprintf("LLC no CMCE/rechazo %d / %d", s.LLCNonCMCE, s.LLCRejected), fmt.Sprintf("Eventos CMCE        %d", s.CMCEEvents)}
+	simpleui.DrawTextStyled("TECHNICAL CONSOLE", 48, 175, 18, simpleui.FontSemiBold, colors.cyan)
+	lines := []string{fmt.Sprintf("STATUS              %s", s.State), fmt.Sprintf("Input/channel        %.0f / %.0f S/s", s.InputRate, s.OutputRate), fmt.Sprintf("Level/quality/AFC    %.1f dBFS / %.1f%% / %+.1f Hz", s.LevelDBFS, s.Quality, s.FrequencyErrorHz), fmt.Sprintf("Timing phase/error   %d / %.3f rad", s.TimingPhase, s.TimingError), fmt.Sprintf("BER / FER           %.2f%% / %.1f%%", s.BER, s.FER), fmt.Sprintf("Audio decision      %s", s.LastAudioDecision), fmt.Sprintf("Rejected E/U/I/D    %d / %d / %d / %d", s.AudioRejectedEncrypted, s.AudioRejectedUnselected, s.AudioRejectedInactive, s.AudioRejectedDamaged), fmt.Sprintf("SYNC / NTS          %d / %d", s.SyncHits, s.NormalBursts), fmt.Sprintf("TS activity         %d / %d / %d / %d", s.SlotBursts[0], s.SlotBursts[1], s.SlotBursts[2], s.SlotBursts[3]), fmt.Sprintf("SCH valid/fail      %d / %d", s.SCHValid, s.SCHCRCFailures), fmt.Sprintf("MAC R/F/B/S         %d / %d / %d / %d", s.MACPDUTypes[0], s.MACPDUTypes[1], s.MACPDUTypes[2], s.MACPDUTypes[3]), fmt.Sprintf("RESOURCE/rejected   %d / %d", s.MACResources, s.MACRejected), fmt.Sprintf("Assignment/encrypted %d / %d", s.MACChannelAlloc, s.MACEncrypted), fmt.Sprintf("LLC types 0..7      %d %d %d %d %d %d %d %d", s.LLCTypes[0], s.LLCTypes[1], s.LLCTypes[2], s.LLCTypes[3], s.LLCTypes[4], s.LLCTypes[5], s.LLCTypes[6], s.LLCTypes[7]), fmt.Sprintf("LLC types 8..15     %d %d %d %d %d %d %d %d", s.LLCTypes[8], s.LLCTypes[9], s.LLCTypes[10], s.LLCTypes[11], s.LLCTypes[12], s.LLCTypes[13], s.LLCTypes[14], s.LLCTypes[15]), fmt.Sprintf("Fragments/joined    %d / %d", s.LLCFragments, s.LLCReassembled), fmt.Sprintf("MLE MM/CMCE/SNDCP   %d / %d / %d", s.MLEProtocols[1], s.MLEProtocols[2], s.MLEProtocols[4]), fmt.Sprintf("LLC non-CMCE/reject %d / %d", s.LLCNonCMCE, s.LLCRejected), fmt.Sprintf("CMCE events         %d", s.CMCEEvents)}
 	for i, line := range lines {
 		simpleui.DrawTextStyled(line, 58, 216+float32(i)*29, 15, simpleui.FontMono, colors.text)
 	}

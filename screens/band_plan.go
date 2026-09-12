@@ -53,7 +53,7 @@ func findBandRange(frequencyHz int64, preferredCategory string) (bandRange, bool
 func (screen *MainScreen) updateBandForFrequency(frequencyHz int64) {
 	band, found := findBandRange(frequencyHz, screen.bandCategory)
 	if !found {
-		screen.bandCategory, screen.bandName = "NONE", "FUERA DE BANDA"
+		screen.bandCategory, screen.bandName = "NONE", "OUT OF BAND"
 	} else {
 		screen.bandCategory, screen.bandName = band.category, band.name
 	}
